@@ -1,6 +1,7 @@
 
 package com.example.company.asyncawaitjava.task;
 
+import com.example.company.asyncawaitjava.config.RetryConfig;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class TaskBuilder<T, R> {
     private Set<Task<?>> dependsOn = new HashSet<>();
     private int autoCancelAfterMs = 0;
     private int maxRetries = 0;
-    private TaskManager.RetryConfig retryConfig = TaskManager.RetryConfig.defaultConfig();
+    private RetryConfig retryConfig = RetryConfig.defaultConfig();
 
     /**
      * Constructs a TaskBuilder for a given TaskManager and action.
@@ -118,7 +119,7 @@ public class TaskBuilder<T, R> {
      * @return This builder.
      * @throws IllegalArgumentException If retryConfig is null.
      */
-    public TaskBuilder<T, R> withRetryConfig(TaskManager.RetryConfig retryConfig) {
+    public TaskBuilder<T, R> withRetryConfig(RetryConfig retryConfig) {
         this.retryConfig = Objects.requireNonNull(retryConfig, "RetryConfig cannot be null");
         return this;
     }

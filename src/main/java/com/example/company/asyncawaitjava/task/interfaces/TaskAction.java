@@ -1,4 +1,4 @@
-package com.example.company.asyncawaitjava.task;
+package com.example.company.asyncawaitjava.task.interfaces;
 
 @FunctionalInterface
 public interface TaskAction {

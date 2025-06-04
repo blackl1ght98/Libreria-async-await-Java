@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.company.asyncawaitjava.task.TestTask" time="35.013" tests="17" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.company.asyncawaitjava.task.TestTask" time="35.017" tests="17" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="24"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="user.country" value="ES"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-24\bin"/>
-    <property name="sun.java.command" value="C:\Users\guill\AppData\Local\Temp\surefire3226669335823201251\surefirebooter-20250601114142093_3.jar C:\Users\guill\AppData\Local\Temp\surefire3226669335823201251 2025-06-01T11-41-41_834-jvmRun1 surefire-20250601114142093_1tmp surefire_0-20250601114142093_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\guill\AppData\Local\Temp\surefire15324106027493472079\surefirebooter-20250604214803077_3.jar C:\Users\guill\AppData\Local\Temp\surefire15324106027493472079 2025-06-04T21-48-02_876-jvmRun1 surefire-20250604214803077_1tmp surefire_0-20250604214803077_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="com.example.company.asyncawaitjava.task.TestTask"/>
     <property name="surefire.test.class.path" value="C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\target\test-classes;C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\target\classes;C:\Users\guill\.m2\repository\org\javassist\javassist\3.30.2-GA\javassist-3.30.2-GA.jar;C:\Users\guill\.m2\repository\com\squareup\javapoet\1.13.0\javapoet-1.13.0.jar;C:\Users\guill\.m2\repository\javax\annotation\javax.annotation-api\1.3.2\javax.annotation-api-1.3.2.jar;C:\Users\guill\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\guill\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\guill\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\guill\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\guill\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\guill\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;"/>
@@ -33,7 +33,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\guill\AppData\Local\Temp\surefire3226669335823201251\surefirebooter-20250601114142093_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\guill\AppData\Local\Temp\surefire15324106027493472079\surefirebooter-20250604214803077_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="24+36-3646"/>
@@ -64,147 +64,147 @@
     <property name="java.class.version" value="68.0"/>
     <property name="argLine" value="--enable-preview"/>
   </properties>
-  <testcase name="executeSupplierWithCallbackInvokesCallback" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.074">
-    <system-err><![CDATA[jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeSupplierWithCallbackInvokesCallback" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.062">
+    <system-err><![CDATA[jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@1534f01b[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="executeRunnableHandlesException" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.01">
+  <testcase name="executeRunnableHandlesException" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.008">
     <system-out><![CDATA[Executing CheckedRunnable, throwing exception
 Awaiting task result
 ]]></system-out>
-    <system-err><![CDATA[jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+    <system-err><![CDATA[jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@498d318c[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: Executing CheckedRunnable
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 SEVERE: Caught exception in CheckedRunnable: Test exception
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
 WARNING: Completing future exceptionally: com.example.company.asyncawaitjava.task.Task$TaskException: Test exception
 ]]></system-err>
   </testcase>
-  <testcase name="closeCancelsUncompletedTask" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.113">
-    <system-err><![CDATA[jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="closeCancelsUncompletedTask" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.11">
+    <system-err><![CDATA[jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@6c80d78a[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: Executing CheckedRunnable
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task cancel
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@8dbdac1, cancelled=true
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task cancel
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Interrupted task thread: pool-4-thread-1
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task close
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task close
 INFO: Closed uncompleted task: com.example.company.asyncawaitjava.task.Task@8dbdac1
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: CheckedRunnable completed successfully
-jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
+jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
 INFO: Completing future normally
 ]]></system-err>
   </testcase>
   <testcase name="executeAsyncAndAwaitRespectsDefaultTimeout" classname="com.example.company.asyncawaitjava.task.TestTask" time="32.007">
-    <system-err><![CDATA[jun 01, 2025 11:41:43 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+    <system-err><![CDATA[jun 04, 2025 9:48:04 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@6e20b53a[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
-WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Task interrupted
 ]]></system-err>
   </testcase>
-  <testcase name="executeRunnableCompletesSuccessfully" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.01">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeRunnableCompletesSuccessfully" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.009">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
+WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Task interrupted
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@7c729a55[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: Executing CheckedRunnable
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: CheckedRunnable completed successfully
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
 INFO: Completing future normally
 ]]></system-err>
   </testcase>
-  <testcase name="executeAsyncAndAwaitHandlesCancellation" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.06">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeAsyncAndAwaitHandlesCancellation" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.062">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@2e005c4b[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task cancel
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@359f7cdf, cancelled=true
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task cancel
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Interrupted task thread: pool-7-thread-1
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
 WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Task interrupted
 ]]></system-err>
   </testcase>
-  <testcase name="executeSupplierReturnsExpectedResult" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.006">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeSupplierReturnsExpectedResult" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.009">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@4f6ee6e4[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="executeFutureHandlesNullFuture" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.004">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeFutureHandlesNullFuture" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.005">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@3e58a80e[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="delayIntroducesExpectedDelay" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.508">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="delayIntroducesExpectedDelay" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.512">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@7b9a4292[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="executeSupplierHandlesException" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.005">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeSupplierHandlesException" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.009">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@5876a9af[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
 WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Test exception
 ]]></system-err>
   </testcase>
-  <testcase name="ofCreatesCompletedTask" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.002">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="ofCreatesCompletedTask" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.004">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@2a798d51[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="executeRunnableWithCallbackInvokesCallback" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.008">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeRunnableWithCallbackInvokesCallback" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.012">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@52bf72b5[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: Executing CheckedRunnable
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: CheckedRunnable completed successfully
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
 INFO: Completing future normally
 ]]></system-err>
   </testcase>
-  <testcase name="awaitWithTimeoutThrowsTimeoutException" classname="com.example.company.asyncawaitjava.task.TestTask" time="2.009">
-    <system-err><![CDATA[jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="awaitWithTimeoutThrowsTimeoutException" classname="com.example.company.asyncawaitjava.task.TestTask" time="2.008">
+    <system-err><![CDATA[jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@6c64cb25[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:15 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:36 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: Executing CheckedRunnable
-jun 01, 2025 11:42:17 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: CheckedRunnable completed successfully
-jun 01, 2025 11:42:17 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
 INFO: Completing future normally
 ]]></system-err>
   </testcase>
-  <testcase name="thenApplyTransformsResult" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.007">
-    <system-err><![CDATA[jun 01, 2025 11:42:17 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="thenApplyTransformsResult" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.014">
+    <system-err><![CDATA[jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@5158b42f[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="fromFutureWrapsExistingFuture" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.006">
-    <system-err><![CDATA[jun 01, 2025 11:42:17 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="fromFutureWrapsExistingFuture" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.011">
+    <system-err><![CDATA[jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@38c6f217[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
-  <testcase name="cancelStopsTask" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.108">
-    <system-err><![CDATA[jun 01, 2025 11:42:17 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="cancelStopsTask" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.107">
+    <system-err><![CDATA[jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@35cabb2a[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-jun 01, 2025 11:42:17 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: Executing CheckedRunnable
-jun 01, 2025 11:42:18 A. M. com.example.company.asyncawaitjava.task.Task cancel
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@564fabc8, cancelled=true
-jun 01, 2025 11:42:18 A. M. com.example.company.asyncawaitjava.task.Task cancel
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Interrupted task thread: pool-17-thread-1
-jun 01, 2025 11:42:18 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$2
 INFO: CheckedRunnable completed successfully
-jun 01, 2025 11:42:18 A. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
+jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$3
 INFO: Completing future normally
 ]]></system-err>
   </testcase>
-  <testcase name="executeAsyncAndAwaitCompletesSuccessfully" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.005">
-    <system-err><![CDATA[jun 01, 2025 11:42:18 A. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
+  <testcase name="executeAsyncAndAwaitCompletesSuccessfully" classname="com.example.company.asyncawaitjava.task.TestTask" time="0.004">
+    <system-err><![CDATA[jun 04, 2025 9:48:38 P. M. com.example.company.asyncawaitjava.config.AsyncAwaitConfig setDefaultExecutor
 INFO: ExecutorService configurado: java.util.concurrent.ThreadPoolExecutor@16d04d3d[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
 ]]></system-err>
   </testcase>
