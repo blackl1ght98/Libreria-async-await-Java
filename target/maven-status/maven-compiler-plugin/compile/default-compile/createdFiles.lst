@@ -1,4 +1,5 @@
 com\example\company\asyncawaitjava\task\Task.class
+com\example\company\asyncawaitjava\task\interfaces\Step$4.class
 com\example\company\asyncawaitjava\core\AsyncProcessor.class
 com\example\company\asyncawaitjava\config\AsyncAwaitConfig.class
 com\example\company\asyncawaitjava\task\interfaces\TaskAction.class
@@ -9,6 +10,7 @@ com\example\company\asyncawaitjava\task\interfaces\Step.class
 com\example\company\asyncawaitjava\task\Task$CheckedRunnable.class
 com\example\company\asyncawaitjava\task\TaskEntry.class
 com\example\company\asyncawaitjava\task\TaskManager$WhenAllBuilder.class
+com\example\company\asyncawaitjava\task\PriorityRunnable.class
 com\example\company\asyncawaitjava\task\interfaces\Step$1.class
 com\example\company\asyncawaitjava\annotations\Async$DefaultExecutor.class
 com\example\company\asyncawaitjava\task\interfaces\Step$3.class

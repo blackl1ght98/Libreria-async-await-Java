@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.example.company.asyncawaitjava.task.TaskManagerTest
 -------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.64 s -- in com.example.company.asyncawaitjava.task.TaskManagerTest
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.61 s -- in com.example.company.asyncawaitjava.task.TaskManagerTest

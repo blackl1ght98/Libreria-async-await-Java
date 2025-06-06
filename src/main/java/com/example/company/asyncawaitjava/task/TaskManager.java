@@ -1,4 +1,3 @@
-
 package com.example.company.asyncawaitjava.task;
 
 import com.example.company.asyncawaitjava.config.RetryConfig;
@@ -8,6 +7,7 @@ import com.example.company.asyncawaitjava.exceptions.customizedException.TaskMan
 import com.example.company.asyncawaitjava.task.Task.TaskException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 /**
  * Un administrador de tareas robusto y seguro para subprocesos que permite
@@ -32,9 +33,9 @@ public class TaskManager<T> {
 
     // Constantes para configuraciones predeterminadas
     private static final int DEFAULT_SCHEDULER_POOL_SIZE = Math.min(4, Runtime.getRuntime().availableProcessors());
-    private static final int DEFAULT_TASK_EXECUTOR_POOL_SIZE = Math.max(8, Runtime.getRuntime().availableProcessors() * 2);
-    private static final int DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE = Math.max(2, Runtime.getRuntime().availableProcessors());
- 
+    private static final int DEFAULT_TASK_EXECUTOR_POOL_SIZE = Math.max(16, Runtime.getRuntime().availableProcessors() * 2);
+    private static final int DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE = Math.max(4, Runtime.getRuntime().availableProcessors());
+
     private static final long SHUTDOWN_TIMEOUT_SECONDS = 5L;
     private static final long AWAIT_ALL_TIMEOUT_SECONDS = 30L;
     private static final long MAX_BACKOFF_MS = 10000L;
@@ -63,8 +64,6 @@ public class TaskManager<T> {
     private final AtomicLong failedTasksCount = new AtomicLong();
     private final AtomicLong timedOutTasksCount = new AtomicLong();
 
-   
-
     /**
      * Construye un TaskManager con una retrollamada de finalización.
      */
@@ -87,7 +86,18 @@ public class TaskManager<T> {
     public TaskManager(Consumer<TaskStatus<T>> onTaskComplete, ScheduledExecutorService scheduler, ExecutorService taskExecutor, ExecutorService callbackExecutor, long taskTimeoutMs) {
         this.onTaskComplete = Objects.requireNonNull(onTaskComplete, "El callback de finalización no puede ser nulo");
         this.scheduler = Objects.requireNonNull(scheduler, "El programador no puede ser nulo");
-        this.taskExecutor = Objects.requireNonNull(taskExecutor, "El ejecutor de tareas no puede ser nulo");
+        this.taskExecutor = new ThreadPoolExecutor(
+                DEFAULT_TASK_EXECUTOR_POOL_SIZE, DEFAULT_TASK_EXECUTOR_POOL_SIZE,
+                0L, TimeUnit.MILLISECONDS,
+                new PriorityBlockingQueue<>(11, (r1, r2) -> {
+                    // Asegurar que las prioridades se comparen correctamente
+                    if (r1 instanceof PriorityRunnable pr1 && r2 instanceof PriorityRunnable pr2) {
+                        return Integer.compare(pr2.getPriority(), pr1.getPriority()); // Mayor prioridad primero
+                    }
+                    return 0;
+                }),
+                new NamedThreadFactory("TaskManager-Executor")
+        );
         this.callbackExecutor = Objects.requireNonNull(callbackExecutor, "El ejecutor de callbacks no puede ser nulo");
         if (taskTimeoutMs <= 0) {
             throw new IllegalArgumentException("taskTimeoutMs debe ser positivo");
@@ -106,7 +116,6 @@ public class TaskManager<T> {
         });
     }
 
-   
     @SafeVarargs
     public static <R> List<Supplier<R>> actions(Supplier<R>... actions) {
         if (actions == null || actions.length == 0) {
@@ -120,6 +129,7 @@ public class TaskManager<T> {
     }
 
     public class WhenAllBuilder<T> {
+
         private final TaskManager<T> taskManager;
         private final Task<?>[] tasks;
 
@@ -175,7 +185,7 @@ public class TaskManager<T> {
             }
             boolean hasAutoCancel = autoCancelAfterMs > 0;
             Supplier<R> wrappedAction = () -> executeWithRetries(action, null, maxRetries, retryConfig);
-            Task<R> task = Task.execute(wrappedAction, taskExecutor);
+            Task<R> task = Task.execute(wrappedAction, taskExecutor, priority); // Pasar prioridad
             TaskEntry<T> entry = new TaskEntry<>(task, data, priority, dependsOn, hasAutoCancel);
             checkCircularDependencies(task, dependsOn);
 
@@ -188,7 +198,7 @@ public class TaskManager<T> {
                 entry.isProcessed = true;
                 task.cancel(true);
                 taskData.put(task, entry);
-                processTask(entry, true, false, null,false);
+                processTask(entry, true, false, null, false);
                 cancelledTasksCount.incrementAndGet();
                 LOGGER.fine("Tarea cancelada debido a dependencias canceladas: tarea=%s, datos=%s".formatted(task, data));
                 return task;
@@ -199,7 +209,9 @@ public class TaskManager<T> {
                 ScheduledFuture<?> future = scheduler.schedule(() -> cancelTask(task, data, true), autoCancelAfterMs, TimeUnit.MILLISECONDS);
                 scheduledCancellations.add(future);
                 taskToCancellation.compute(task, (k, existing) -> {
-                    if (existing != null) existing.cancel(false);
+                    if (existing != null) {
+                        existing.cancel(false);
+                    }
                     return future;
                 });
             }
@@ -217,6 +229,7 @@ public class TaskManager<T> {
         long startTime = System.currentTimeMillis();
 
         class RetryAttempt {
+
             private void attempt() {
                 if (isClosed || (task != null && task.future.isCancelled())) {
                     future.completeExceptionally(new TaskManagerException("Tarea cancelada o TaskManager cerrado", null));
@@ -259,7 +272,9 @@ public class TaskManager<T> {
                             this::attempt, delay, TimeUnit.MILLISECONDS);
                     if (task != null) {
                         taskToCancellation.compute(task, (k, existing) -> {
-                            if (existing != null) existing.cancel(false);
+                            if (existing != null) {
+                                existing.cancel(false);
+                            }
                             return retryFuture;
                         });
                     }
@@ -313,8 +328,7 @@ public class TaskManager<T> {
                     }
                 };
                 Set<Task<?>> dependsOn = previousTask != null ? Set.of(previousTask) : null;
-                int autoCancel = isLast ? autoCancelAfterMs : 0;
-                Task<?> task = scheduleTask(supplier, data, priority, dependsOn, autoCancel, maxRetries, retryConfig);
+                Task<?> task = scheduleTask(supplier, data, priority, dependsOn, autoCancelAfterMs, maxRetries, retryConfig); // Aplica autoCancel a todas
                 lastTask = task;
                 LOGGER.fine("Tarea dependiente configurada: tarea=%s, data=%s, dependsOn=%s".formatted(task, data, dependsOn));
                 previousTask = task;
@@ -351,7 +365,7 @@ public class TaskManager<T> {
                 entry.isCancelled = true;
                 entry.isProcessed = true;
                 taskData.put(task, entry);
-                processTask(entry, true, false, null,false);
+                processTask(entry, true, false, null, false);
                 cancelledTasksCount.incrementAndGet();
                 LOGGER.fine("Tarea no añadida debido a dependencias canceladas: tarea=%s, datos=%s".formatted(task, data));
                 return;
@@ -389,152 +403,135 @@ public class TaskManager<T> {
         }
     }
 
-
-
-private void processTaskCompletion(Task<?> task, TaskEntry<T> entry, Object result, Throwable ex) {
-    if (isClosed) {
-        LOGGER.fine("Omitiendo la tarea %s, datos=%s, razonamiento=TaskManager cerrado".formatted(task, entry.data));
-        return;
-    }
-
-    writeLock.lock();
-    try {
-        if (entry.isProcessed) {
-            LOGGER.fine("Omitiendo la tarea %s, datos=%s, razonamiento=ya procesada".formatted(task, entry.data));
-            return;
-        }
-        LOGGER.info("Procesando tarea: task=%s, datos=%s, isCancelled=%b, isFailed=%b"
-                .formatted(task, entry.data, entry.isCancelled || task.isCancelled(), ex != null));
-        entry.isProcessed = true;
-
-        boolean isFailed = ex != null && !entry.isCancelled && !task.isCancelled() && !(ex.getCause() instanceof CancellationException);
-        if (entry.isCancelled || task.isCancelled() || (ex != null && ex.getCause() instanceof CancellationException)) {
-            entry.isCancelled = true;
-            processTask(entry, true, false, null, entry.hasAutoCancel); // Usar hasAutoCancel de la entrada
-            cancelledTasksCount.incrementAndGet();
-            tasks.remove(entry); // Asegurarse de eliminar la tarea de tasks
-            // Cancelar dependientes
-            Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
-            for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
-                if (!dep.isProcessed && !dep.isCancelled) {
-                    LOGGER.fine("Cancelando dependiente por tarea cancelada: tarea=%s, datos=%s".formatted(dep.task, dep.data));
-                    cancelTask(dep.task, dep.data, entry.hasAutoCancel);
-                }
+    private void processTaskCompletion(Task<?> task, TaskEntry<T> entry, Object result, Throwable ex) {
+        writeLock.lock();
+        try {
+            if (entry.isProcessed) {
+                LOGGER.fine("Omitiendo la tarea %s, datos=%s, razonamiento=ya procesada".formatted(task, entry.data));
+                return;
             }
-        } else if (isFailed) {
-            Exception exception = ex.getCause() instanceof Exception ? (Exception) ex.getCause() : new TaskException("Error en tarea", ex);
-            processTask(entry, false, true, exception, false); // Fallos no son auto-cancel
-            failedTasksCount.incrementAndGet();
-            // Cancelar dependientes si la tarea falló
-            Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
-            for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
-                if (!dep.isProcessed && !dep.isCancelled) {
-                    LOGGER.fine("Cancelando dependiente por tarea fallida: tarea=%s, datos=%s".formatted(dep.task, dep.data));
-                    cancelTask(dep.task, dep.data, false);
-                }
+            LOGGER.info("Procesando tarea: task=%s, datos=%s, isCancelled=%b, isFailed=%b"
+                    .formatted(task, entry.data, entry.isCancelled || task.isCancelled(), ex != null));
+            entry.isProcessed = true;
+
+            boolean isFailed = ex != null && !entry.isCancelled && !task.isCancelled() && !(ex.getCause() instanceof CancellationException);
+            if (entry.isCancelled || task.isCancelled() || (ex != null && ex.getCause() instanceof CancellationException)) {
+                entry.isCancelled = true;
+                processTask(entry, true, false, null, entry.hasAutoCancel);
+                cancelledTasksCount.incrementAndGet();
+                tasks.remove(entry);
+                // Cancelar dependientes
+                cancelDependents(task, entry.hasAutoCancel);
+            } else if (isFailed) {
+                Exception exception = ex.getCause() instanceof Exception ? (Exception) ex.getCause() : new TaskException("Error en tarea", ex);
+                processTask(entry, false, true, exception, false);
+                failedTasksCount.incrementAndGet();
+                // Cancelar dependientes si la tarea falló
+                cancelDependents(task, false);
+            } else {
+                processTask(entry, false, false, null, false);
+                completedTasksCount.incrementAndGet();
+                LOGGER.info("Tarea completada exitosamente: task=%s, datos=%s".formatted(task, entry.data));
             }
-        } else {
-            processTask(entry, false, false, null, false); // Completadas no son auto-cancel
-            completedTasksCount.incrementAndGet();
-            // No cancelar dependientes si la tarea se completó exitosamente
+
+            cleanupTask(task, entry);
+        } finally {
+            writeLock.unlock();
         }
 
-        cleanupTask(task, entry);
-    } finally {
-        writeLock.unlock();
+        // Procesar dependientes solo si la tarea se completó exitosamente
+        if (!isClosed && !entry.isCancelled && !task.isCancelled() && ex == null) {
+            Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
+            if (!dependents.isEmpty()) {
+                LOGGER.fine("Procesando %d dependientes para la tarea %s".formatted(dependents.size(), task));
+                processDependents(dependents);
+            }
+        }
     }
 
-    // Procesar dependientes solo si la tarea se completó exitosamente
-    if (!isClosed && !entry.isCancelled && !task.isCancelled() && ex == null) {
+    private void cancelDependents(Task<?> task, boolean isAutoCancel) {
         Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
-        if (!dependents.isEmpty()) {
-            LOGGER.fine("Procesando %d dependientes para la tarea %s".formatted(dependents.size(), task));
-            processDependents(dependents);
+        for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
+            if (!dep.isProcessed && !dep.isCancelled) {
+                LOGGER.fine("Cancelando dependiente: tarea=%s, datos=%s, autoCancel=%b".formatted(dep.task, dep.data, isAutoCancel));
+                cancelTask(dep.task, dep.data, isAutoCancel);
+            }
         }
     }
-}
-private void processDependents(Set<TaskEntry<T>> dependents) {
-    List<TaskEntry<T>> readyDependents = new ArrayList<>();
 
-    writeLock.lock();
-    try {
-        for (TaskEntry<T> dependent : dependents) {
-            if (!dependent.isProcessed && !dependent.isCancelled && !dependent.task.isCancelled()) {
+    private void processDependents(Set<TaskEntry<T>> dependents) {
+        List<TaskEntry<T>> readyDependents = new ArrayList<>();
+
+        writeLock.lock();
+        try {
+            for (TaskEntry<T> dependent : dependents) {
+                if (dependent.isProcessed || dependent.isCancelled || dependent.task.isCancelled()) {
+                    LOGGER.fine("Omitiendo dependiente: tarea=%s, razon=procesado o cancelado.".formatted(dependent.task));
+                    continue;
+                }
+                // Verificar si alguna dependencia está cancelada o fallida
+                boolean hasInvalidDependency = dependent.dependsOn.stream()
+                        .map(taskData::get)
+                        .filter(Objects::nonNull)
+                        .anyMatch(depEntry -> depEntry.isCancelled || depEntry.task.isCancelled() || depEntry.isFailed);
+                if (hasInvalidDependency) {
+                    LOGGER.fine("Cancelando dependiente por dependencia inválida: tarea=%s, datos=%s".formatted(dependent.task, dependent.data));
+                    cancelTask(dependent.task, dependent.data, dependent.hasAutoCancel);
+                    continue;
+                }
                 if (areDependenciesCompleted(dependent)) {
                     readyDependents.add(dependent);
                     LOGGER.fine("Dependiente listo para procesar: tarea=%s, datos=%s".formatted(dependent.task, dependent.data));
-                } else {
-                    // Solo cancelar si la dependencia está explícitamente cancelada
-                    boolean hasCancelledDependency = dependent.dependsOn.stream()
-                            .map(taskData::get)
-                            .filter(Objects::nonNull)
-                            .anyMatch(depEntry -> depEntry.isCancelled);
-                    if (hasCancelledDependency) {
-                        LOGGER.fine("Cancelando dependiente por dependencia cancelada: tarea=%s, datos=%s".formatted(dependent.task, dependent.data));
-                        cancelTask(dependent.task, dependent.data);
-                    } else {
-                        LOGGER.fine("Dependiente no listo: tarea=%s, datos=%s, depsCompleted=%b, isProcessed=%b, isCancelled=%b"
-                                .formatted(dependent.task, dependent.data, areDependenciesCompleted(dependent), dependent.isProcessed, dependent.isCancelled));
-                    }
                 }
-            } else {
-                LOGGER.fine("Omitiendo dependiente: tarea=%s, razon=procesado o cancelado".formatted(dependent.task));
             }
+        } finally {
+            writeLock.unlock();
         }
-    } finally {
-        writeLock.unlock();
-    }
 
-    if (!readyDependents.isEmpty()) {
-        LOGGER.info("Enviando %d dependientes al taskExecutor".formatted(readyDependents.size()));
-        taskExecutor.submit(() -> {
-            for (TaskEntry<T> dependent : readyDependents) {
-                writeLock.lock();
-                try {
-                    if (dependent.isProcessed || dependent.isCancelled || dependent.task.isCancelled()) {
-                        LOGGER.fine("Omitiendo dependiente: tarea=%s, razon=procesado o cancelado".formatted(dependent.task));
-                        continue;
-                    }
-                    // Verificar nuevamente las dependencias
-                    boolean hasCancelledDependency = dependent.dependsOn.stream()
-                            .map(taskData::get)
-                            .filter(Objects::nonNull)
-                            .anyMatch(depEntry -> depEntry.isCancelled);
-                    if (hasCancelledDependency) {
-                        LOGGER.fine("Cancelando dependiente por dependencia cancelada en ejecución: tarea=%s, datos=%s".formatted(dependent.task, dependent.data));
-                        cancelTask(dependent.task, dependent.data);
-                        continue;
-                    }
-                    if (!areDependenciesCompleted(dependent)) {
-                        LOGGER.fine("Omitiendo dependiente: tarea=%s, dependencias no satisfechas".formatted(dependent.task));
-                        continue; // No cancelar, solo omitir
-                    }
-                    dependent.isProcessed = true;
-                } finally {
-                    writeLock.unlock();
-                }
-
-                if (dependent.task.isDone()) {
+        if (!readyDependents.isEmpty()) {
+            LOGGER.info("Enviando %d dependientes al taskExecutor".formatted(readyDependents.size()));
+            taskExecutor.submit(() -> {
+                for (TaskEntry<T> dependent : readyDependents) {
+                    writeLock.lock();
                     try {
-                        Object result = dependent.task.future.get();
-                        processTaskCompletion(dependent.task, dependent, result, null);
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Error procesando dependiente completado: tarea=%s".formatted(dependent.task), e);
-                        processTaskCompletion(dependent.task, dependent, null, e);
+                        if (dependent.isProcessed || dependent.isCancelled || dependent.task.isCancelled()) {
+                            continue;
+                        }
+                        // Verificación adicional antes de ejecutar
+                        boolean hasInvalidDependency = dependent.dependsOn.stream()
+                                .map(taskData::get)
+                                .filter(Objects::nonNull)
+                                .anyMatch(depEntry -> depEntry.isCancelled || depEntry.task.isCancelled() || depEntry.isFailed);
+                        if (hasInvalidDependency) {
+                            cancelTask(dependent.task, dependent.data, dependent.hasAutoCancel);
+                            continue;
+                        }
+                        if (!areDependenciesCompleted(dependent)) {
+                            continue;
+                        }
+                        dependent.isProcessed = true;
+                    } finally {
+                        writeLock.unlock();
                     }
-                } else {
-                    LOGGER.fine("Programando completitud asíncrona para dependiente: tarea=%s".formatted(dependent.task));
-                    dependent.task.future.whenCompleteAsync(
-                            (res, err) -> processTaskCompletion(dependent.task, dependent, res, err),
-                            taskExecutor
-                    );
+
+                    if (dependent.task.isDone()) {
+                        try {
+                            Object result = dependent.task.future.get();
+                            processTaskCompletion(dependent.task, dependent, result, null);
+                        } catch (Exception e) {
+                            processTaskCompletion(dependent.task, dependent, null, e);
+                        }
+                    } else {
+                        dependent.task.future.whenCompleteAsync(
+                                (res, err) -> processTaskCompletion(dependent.task, dependent, res, err),
+                                taskExecutor
+                        );
+                    }
                 }
-            }
-        });
-    } else {
-        LOGGER.fine("No hay dependientes listos para procesar");
+            });
+        }
     }
-}
+
     private boolean areDependenciesCompleted(TaskEntry<T> entry) {
         if (entry.dependsOn.isEmpty()) {
             LOGGER.fine("No hay dependencias para la tarea %s, datos=%s".formatted(entry.task, entry.data));
@@ -546,9 +543,10 @@ private void processDependents(Set<TaskEntry<T>> dependents) {
                 LOGGER.warning("Dependencia no encontrada en taskData: dep=%s, tarea=%s".formatted(dep, entry.task));
                 return false;
             }
-            if (!depEntry.task.isDone() && !depEntry.isCancelled && !depEntry.isProcessed) {
-                LOGGER.fine("Dependencia no completada: dep=%s, isDone=%b, isCancelled=%b, isProcessed=%b, tarea=%s"
-                        .formatted(dep, depEntry.task.isDone(), depEntry.isCancelled, depEntry.isProcessed, entry.task));
+            // Requerir que la tarea esté completada Y procesada
+            if (!depEntry.task.isDone() || !depEntry.isProcessed || depEntry.isCancelled || depEntry.isFailed) {
+                LOGGER.fine("Dependencia no completada: dep=%s, isDone=%b, isProcessed=%b, isCancelled=%b, isFailed=%b, tarea=%s"
+                        .formatted(dep, depEntry.task.isDone(), depEntry.isProcessed, depEntry.isCancelled, depEntry.isFailed, entry.task));
                 return false;
             }
         }
@@ -556,76 +554,92 @@ private void processDependents(Set<TaskEntry<T>> dependents) {
         return true;
     }
 
-
-
     private void cleanupTask(Task<?> task, TaskEntry<T> entry) {
-    writeLock.lock();
-    try {
-        LOGGER.info("Limpiando tarea=%s, datos=%s".formatted(task, entry.data));
-        tasks.remove(entry); // Asegurarse de eliminar la tarea de tasks
-        taskData.remove(task);
-        taskStartTimes.remove(task);
-        dependentTasks.remove(task);
-        ScheduledFuture<?> cancellation = taskToCancellation.remove(task);
-        if (cancellation != null) {
-            cancellation.cancel(false);
-            scheduledCancellations.remove(cancellation);
+        writeLock.lock();
+        try {
+            LOGGER.info("Limpiando tarea=%s, datos=%s".formatted(task, entry.data));
+            tasks.remove(entry); // Asegurarse de eliminar la tarea de tasks
+            taskData.remove(task);
+            taskStartTimes.remove(task);
+            dependentTasks.remove(task);
+            ScheduledFuture<?> cancellation = taskToCancellation.remove(task);
+            if (cancellation != null) {
+                cancellation.cancel(false);
+                scheduledCancellations.remove(cancellation);
+            }
+        } finally {
+            writeLock.unlock();
         }
-    } finally {
-        writeLock.unlock();
     }
-}
 
-public boolean cancelTask(Task<?> task, T dataForCallback, boolean isAutoCancel) {
-    writeLock.lock();
-    try {
-        if (isClosed) {
-            LOGGER.fine("Intento de cancelar tarea fallido: TaskManager cerrado, tarea=%s".formatted(task));
-            return false;
-        }
+    public boolean cancelTask(Task<?> task, T dataForCallback, boolean isAutoCancel) {
+        writeLock.lock();
+        try {
+            if (isClosed) {
+                LOGGER.fine("Intento de cancelar tarea fallido: TaskManager cerrado, tarea=%s".formatted(task));
+                return false;
+            }
 
-        TaskEntry<T> entry = taskData.get(task);
-        boolean wasCancelled = false;
+            TaskEntry<T> entry = taskData.get(task);
+            if (entry == null || entry.isProcessed || entry.isCancelled) {
+                LOGGER.fine("Tarea ya procesada o cancelada: tarea=%s, datos=%s".formatted(task, dataForCallback));
+                return false;
+            }
 
-        if (entry != null && !entry.isProcessed && !entry.isCancelled) {
             entry.isCancelled = true;
             entry.isProcessed = true;
             entry.task.cancel(true);
-            wasCancelled = true;
-            tasks.remove(entry); // Asegurarse de eliminar la tarea de tasks
-            // Usar dataForCallback en lugar de entry.data para el callback
+            tasks.remove(entry);
             processTask(entry, dataForCallback, true, false, null, isAutoCancel);
-        }
 
-        // Cancelar todas las tareas dependientes inmediatamente
-        Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
-        for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
-            if (!dep.isProcessed && !dep.isCancelled) {
-                LOGGER.fine("Cancelando dependiente por cancelación de tarea padre: tarea=%s, datos=%s".formatted(dep.task, dep.data));
-                cancelTask(dep.task, dep.data, isAutoCancel);
+            // Cancelar dependientes
+            Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
+            for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
+                if (!dep.isProcessed && !dep.isCancelled) {
+                    LOGGER.fine("Cancelando dependiente: tarea=%s, datos=%s".formatted(dep.task, dep.data));
+                    cancelTask(dep.task, dep.data, isAutoCancel);
+                }
             }
-        }
 
-        if (wasCancelled) {
             cancelledTasksCount.incrementAndGet();
-            cleanupTask(task, entry); // Limpiar después de procesar
+            cleanupTask(task, entry);
             LOGGER.info("Cancelación de tarea exitosa: tarea=%s, datos=%s, autoCancel=%b, métricas=%s"
                     .formatted(task, dataForCallback, isAutoCancel, getMetrics()));
             return true;
+        } finally {
+            writeLock.unlock();
         }
-
-        LOGGER.fine("Tarea ya procesada o cancelada: tarea=%s, datos=%s".formatted(task, dataForCallback));
-        return false;
-    } finally {
-        writeLock.unlock();
     }
-}
+
     public boolean cancelTask(Task<?> task, T dataForCallback) {
         return cancelTask(task, dataForCallback, false);
     }
 
+    public void cancelTasksForData(T data, boolean isAutoCancel) {
+        writeLock.lock();
+        try {
+            List<TaskEntry<T>> tasksToCancel = taskData.entrySet().stream()
+                    .filter(entry -> entry.getValue().data.equals(data) && !entry.getValue().isProcessed && !entry.getValue().isCancelled)
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
+            for (TaskEntry<T> entry : tasksToCancel) {
+                if (entry.groupCancellationToken != null) {
+                    entry.groupCancellationToken.set(true); // Marcar el grupo como cancelado
+                }
+                cancelTask(entry.task, entry.data, isAutoCancel);
+                if (entry.task.getFuture() != null) {
+                    entry.task.getFuture().cancel(true); // Forzar interrupción
+                }
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
     private void checkCircularDependencies(Task<?> task, Set<Task<?>> dependsOn) {
-        if (dependsOn == null || dependsOn.isEmpty()) return;
+        if (dependsOn == null || dependsOn.isEmpty()) {
+            return;
+        }
         Set<Task<?>> visited = new HashSet<>();
         Set<Task<?>> path = new HashSet<>();
         Deque<Task<?>> stack = new ArrayDeque<>(dependsOn);
@@ -644,27 +658,52 @@ public boolean cancelTask(Task<?> task, T dataForCallback, boolean isAutoCancel)
         }
     }
 
-  private void processTask(TaskEntry<T> entry, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
-    processTask(entry, entry.data, isCancelled, isFailed, exception, isAutoCancel); // Usar entry.data por defecto
-}
-
-private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
-    if (onTaskComplete != null && callbackData != null) {
-        callbackExecutor.submit(() -> {
-            try {
-                LOGGER.fine("Ejecutando callback: data=%s, isCancelled=%b, isFailed=%b, isAutoCancel=%b".formatted(callbackData, isCancelled, isFailed, isAutoCancel));
-                onTaskComplete.accept(new TaskStatus<>(callbackData, isCancelled, isFailed, exception, isAutoCancel));
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error en callback para la tarea con datos: " + callbackData, e);
-            }
-        });
+    private void processTask(TaskEntry<T> entry, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
+        processTask(entry, entry.data, isCancelled, isFailed, exception, isAutoCancel); // Usar entry.data por defecto
     }
-}
+
+//    private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
+//        if (onTaskComplete != null && callbackData != null) {
+//            callbackExecutor.submit(() -> {
+//                try {
+//                    boolean isLastTaskInPipeline = dependentTasks.getOrDefault(entry.task, Collections.emptySet()).isEmpty();
+//                    LOGGER.fine("Ejecutando callback: data=%s, isCancelled=%b, isFailed=%b, isAutoCancel=%b, isLastTaskInPipeline=%b"
+//                            .formatted(callbackData, isCancelled, isFailed, isAutoCancel, isLastTaskInPipeline));
+//                    onTaskComplete.accept(new TaskStatus<>(callbackData, isCancelled, isFailed, exception, isAutoCancel, isLastTaskInPipeline));
+//                } catch (Exception e) {
+//                    LOGGER.log(Level.SEVERE, "Error en callback para la tarea con datos: " + callbackData, e);
+//                }
+//            });
+//        }
+//    }
+    private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
+        if (onTaskComplete != null && callbackData != null) {
+            LOGGER.fine("Enviando callback para tarea: %s, data=%s, isLastTaskInPipeline=%b".formatted(entry.task, callbackData, entry.task.isLastTaskInPipeline()));
+            CompletableFuture.runAsync(() -> {
+                try {
+                    boolean isLastTaskInPipeline = entry.task.isLastTaskInPipeline();
+                    LOGGER.fine("Ejecutando callback: data=%s, isCancelled=%b, isFailed=%b, isAutoCancel=%b, isLastTaskInPipeline=%b"
+                            .formatted(callbackData, isCancelled, isFailed, isAutoCancel, isLastTaskInPipeline));
+                    onTaskComplete.accept(new TaskStatus<>(callbackData, isCancelled, isFailed, exception, isAutoCancel, isLastTaskInPipeline));
+                    LOGGER.fine("Callback ejecutado exitosamente para data=%s".formatted(callbackData));
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error en callback para la tarea con datos: " + callbackData, e);
+                }
+            }, callbackExecutor).exceptionally(e -> {
+                LOGGER.log(Level.SEVERE, "Error al enviar callback para la tarea con datos: " + callbackData, e);
+                return null;
+            });
+        } else {
+            LOGGER.fine("Callback no enviado: onTaskComplete=%s, callbackData=%s".formatted(onTaskComplete, callbackData));
+        }
+    }
 
     public void awaitAll() throws InterruptedException {
         writeLock.lock();
         try {
-            if (isClosed) return;
+            if (isClosed) {
+                return;
+            }
         } finally {
             writeLock.unlock();
         }
@@ -675,6 +714,10 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
         );
         try {
             allTasks.get(AWAIT_ALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            // Esperar a que todas las tareas estén procesadas
+            while (!tasks.isEmpty()) {
+                Thread.sleep(100); // Breve espera para permitir procesamiento
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw e;
@@ -686,35 +729,19 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
         writeLock.lock();
         try {
             callbackExecutor.shutdown();
-            try {
-                if (!callbackExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                    LOGGER.warning("Callbacks no terminaron en 5 segundos, forzando cierre");
-                    callbackExecutor.shutdownNow();
-                    if (!callbackExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
-                        LOGGER.severe("No se pudo cerrar completamente el callbackExecutor");
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                LOGGER.warning("Interrumpido mientras se esperaba callbacks, restaurando estado");
-                throw e;
-            } finally {
-                callbackExecutor = Executors.newFixedThreadPool(DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE,
-                        new NamedThreadFactory("TaskManager-Callback"));
-            }
-
-            for (ScheduledFuture<?> future : new ArrayList<>(scheduledCancellations)) {
-                if (!future.isDone() && !future.isCancelled()) {
-                    try {
-                        future.cancel(false);
-                        LOGGER.fine("Cancelada future programada: %s".formatted(future));
-                    } catch (Exception e) {
-                        LOGGER.warning("Error al cancelar future programada: %s".formatted(e.toString()));
-                    }
+            if (!callbackExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                LOGGER.warning("Callbacks no terminaron en 5 segundos, forzando cierre");
+                callbackExecutor.shutdownNow();
+                if (!callbackExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+                    LOGGER.severe("No se pudo cerrar completamente el callbackExecutor");
                 }
             }
-            scheduledCancellations.clear();
-            taskToCancellation.clear();
+            callbackExecutor = Executors.newFixedThreadPool(DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE,
+                    new NamedThreadFactory("TaskManager-Callback"));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.warning("Interrumpido mientras se esperaba callbacks, restaurando estado");
+            throw e;
         } finally {
             writeLock.unlock();
         }
@@ -733,14 +760,16 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
     public void close() {
         closeLock.lock();
         try {
-            if (isClosed) return;
+            if (isClosed) {
+                return;
+            }
             isClosed = true;
             for (TaskEntry<T> entry : tasks) {
                 if (!entry.isCancelled && !entry.task.isDone()) {
                     entry.isCancelled = true;
                     entry.isProcessed = true;
                     entry.task.cancel(true);
-                    processTask(entry, true, false, null,false);
+                    processTask(entry, true, false, null, false);
                     cancelledTasksCount.incrementAndGet();
                 }
             }
@@ -806,7 +835,9 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
                     LOGGER.warning("Interrumpido durante el cierre del ejecutor %s (intento %d), restaurando estado".formatted(executor, attempts));
                     executor.shutdownNow();
                     try {
-                        if (attempts < maxAttempts) Thread.sleep(100);
+                        if (attempts < maxAttempts) {
+                            Thread.sleep(100);
+                        }
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         LOGGER.severe("Segunda interrupción durante el cierre del ejecutor %s (intento %d)".formatted(executor, attempts));
@@ -844,28 +875,6 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
         addChainedTasks(firstAction, secondAction, data, priority, autoCancelSecondAfterMs, RetryConfig.defaultConfig());
     }
 
-    public <R1, R2> void addChainedTasks(Supplier<R1> firstAction, Supplier<R2> secondAction, T data, int priority, int autoCancelAfterMs, RetryConfig retryConfig) {
-        validateParameters(firstAction, autoCancelAfterMs, 0, retryConfig);
-        validateParameters(secondAction, autoCancelAfterMs, 0, retryConfig);
-        closeLock.lock();
-        try {
-            if (isClosed) {
-                throw new TaskManagerException("TaskManager está cerrado", null);
-            }
-            TaskBuilder<T, R1> firstTaskBuilder = newTask(firstAction).withPriority(priority).withRetryConfig(retryConfig);
-            Task<R1> firstTask = firstTaskBuilder.schedule();
-            newTask(secondAction)
-                    .withData(data)
-                    .withPriority(priority)
-                    .withDependency(firstTask)
-                    .withAutoCancel(autoCancelAfterMs)
-                    .withRetryConfig(retryConfig)
-                    .schedule();
-        } finally {
-            closeLock.unlock();
-        }
-    }
-
     public Map<String, Long> getMetrics() {
         return Map.of(
                 "completedTasks", completedTasksCount.get(),
@@ -874,6 +883,22 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
                 "timedOutTasks", timedOutTasksCount.get(),
                 "activeTasks", (long) getActiveTaskCount()
         );
+    }
+
+    public <R1, R2> void addChainedTasks(Supplier<R1> firstAction, Supplier<R2> secondAction, T data, int priority, int autoCancelAfterMs, RetryConfig retryConfig) {
+        validateParameters(firstAction, autoCancelAfterMs, 0, retryConfig);
+        validateParameters(secondAction, autoCancelAfterMs, 0, retryConfig);
+        closeLock.lock();
+        try {
+            if (isClosed) {
+                throw new TaskManagerException("TaskManager está cerrado", null);
+            }
+            Task<R1> firstTask = scheduleTask(firstAction, data, priority, null, autoCancelAfterMs, 0, retryConfig);
+            Task<R2> secondTask = scheduleTask(secondAction, data, priority, Set.of(firstTask), autoCancelAfterMs, 0, retryConfig);
+            LOGGER.info("Programadas tareas encadenadas: data=%s, priority=%d".formatted(data, priority));
+        } finally {
+            closeLock.unlock();
+        }
     }
 
     private void validateParameters(Supplier<?> action, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig) {
@@ -891,8 +916,6 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
         }
     }
 
-   
-
     public Task<?> findFirstTask(Predicate<TaskEntry<T>> predicate) {
         readLock.lock();
         try {
@@ -903,6 +926,133 @@ private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled
                     .orElse(null);
         } finally {
             readLock.unlock();
+        }
+    }
+
+    /**
+     * Añade un grupo de tareas secuenciales con cancelación estricta. Si el
+     * dato asociado se cancela, todas las tareas del grupo se detienen
+     * inmediatamente.
+     *
+     * @param steps Lista de pasos a ejecutar en secuencia.
+     * @param data Datos asociados a las tareas.
+     * @param priority Prioridad de las tareas.
+     * @param autoCancelAfterMs Tiempo después del cual se cancelan
+     * automáticamente (0 para desactivar).
+     * @param maxRetries Número máximo de reintentos.
+     * @param retryConfig Configuración de reintentos.
+     * @return La última tarea programada.
+     */
+
+    public Task<?> addSequentialTasksWithStrict(
+            List<Step<?>> steps, T data, int priority, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig
+    ) {
+        if (steps == null || steps.isEmpty()) {
+            throw new IllegalArgumentException("La lista de pasos no puede ser nula o vacía");
+        }
+        steps.forEach(step -> validateParameters(() -> step, autoCancelAfterMs, maxRetries, retryConfig));
+
+        closeLock.lock();
+        try {
+            if (isClosed) {
+                throw new TaskManagerException("TaskManager está cerrado", null);
+            }
+
+            AtomicBoolean isGroupCancelled = new AtomicBoolean(false);
+            Set<Task<?>> groupTasks = ConcurrentHashMap.newKeySet();
+            Task<?> lastTask = null;
+            CompletableFuture<Object> previousFuture = CompletableFuture.completedFuture(null);
+
+            for (int i = 0; i < steps.size(); i++) {
+                Step<?> step = steps.get(i);
+                boolean isLastStep = i == steps.size() - 1;
+                final int stepIndex = i;
+
+                // Crear un CompletableFuture para la tarea actual que depende del anterior
+                CompletableFuture<Object> currentFuture = previousFuture.thenComposeAsync(v -> {
+                    if (isGroupCancelled.get() || Thread.currentThread().isInterrupted()) {
+                        return CompletableFuture.failedFuture(
+                                new TaskManagerException("Tarea cancelada antes de ejecutarse: data=" + data, null)
+                        );
+                    }
+                    Supplier<Object> wrappedStep = () -> {
+                        if (isGroupCancelled.get()) {
+                            throw new TaskManagerException("Tarea cancelada antes de ejecutarse: data=" + data, null);
+                        }
+                        try {
+                            return step.execute();
+                        } catch (Throwable t) {
+                            throw new TaskManagerException("Error ejecutando paso en tarea: " + data, t);
+                        }
+                    };
+                    return CompletableFuture.supplyAsync(
+                            () -> executeWithRetries(wrappedStep, null, maxRetries, retryConfig),
+                            taskExecutor
+                    );
+                }, taskExecutor);
+
+                // Crear la tarea usando el constructor correcto
+                Task<Object> task = new Task<>(
+                        currentFuture,
+                        t -> LOGGER.fine("Tarea secuencial %d iniciada: %s".formatted(stepIndex, t)),
+                        isLastStep
+                );
+                groupTasks.add(task);
+
+                // Configurar TaskEntry
+                TaskEntry<T> entry = new TaskEntry<>(task, data, priority, Set.of(), autoCancelAfterMs > 0);
+                entry.groupCancellationToken = isGroupCancelled;
+                taskData.putIfAbsent(task, entry);
+
+                // Añadir la tarea
+                addTask(task, data, priority, Set.of(), autoCancelAfterMs > 0);
+                LOGGER.fine("Tarea añadida: tarea=%s, data=%s, isLastTaskInPipeline=%b".formatted(task, data, isLastStep));
+
+                // Configurar cancelación automática si es necesario
+                if (autoCancelAfterMs > 0) {
+                    ScheduledFuture<?> future = scheduler.schedule(
+                            () -> cancelTask(task, data, true), autoCancelAfterMs, TimeUnit.MILLISECONDS
+                    );
+                    scheduledCancellations.add(future);
+                    taskToCancellation.compute(task, (k, existing) -> {
+                        if (existing != null) {
+                            existing.cancel(false);
+                        }
+                        return future;
+                    });
+                }
+
+                // Configurar cancelación del grupo si la tarea falla o se cancela
+                task.getFuture().whenComplete((result, ex) -> {
+                    if (task.isCancelled() || (ex != null && ex.getCause() instanceof CancellationException)) {
+                        isGroupCancelled.set(true);
+                        groupTasks.forEach(t -> {
+                            if (!t.isDone() && !t.isCancelled()) {
+                                t.cancel(true);
+                            }
+                        });
+                    } else if (ex != null) {
+                        isGroupCancelled.set(true);
+                        groupTasks.forEach(t -> {
+                            if (!t.isDone() && !t.isCancelled()) {
+                                t.cancel(true);
+                            }
+                        });
+                    }
+                });
+
+                lastTask = task;
+                previousFuture = currentFuture;
+                LOGGER.fine("Tarea secuencial configurada: tarea=%s, data=%s, step=%d, isLast=%b".formatted(task, data, i, isLastStep));
+            }
+
+            LOGGER.info("Programadas %d tareas secuenciales con cancelación estricta: data=%s, priority=%d".formatted(steps.size(), data, priority));
+            return lastTask;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error programando tareas secuenciales: data=%s".formatted(data), e);
+            throw new TaskManagerException("Error programando tareas secuenciales", e);
+        } finally {
+            closeLock.unlock();
         }
     }
 }

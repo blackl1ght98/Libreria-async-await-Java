@@ -1,10 +1,12 @@
 package com.example.company.asyncawaitjava.task.interfaces;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /**
  * Representa un paso en una cadena de tareas, con un resultado de tipo R.
  */
+
 public interface Step<R> {
     /**
      * Ejecuta el paso y devuelve un resultado (o null para Void).
@@ -75,6 +77,27 @@ public interface Step<R> {
             @Override
             public Class<Void> getReturnType() {
                 return Void.class;
+            }
+        };
+    }
+    
+    /**
+     * Crea un paso que ejecuta una tarea asíncrona representada por un CompletableFuture.
+     * @param futureSupplier El proveedor del CompletableFuture.
+     * @param returnType El tipo de retorno esperado.
+     * @param <T> El tipo de retorno.
+     * @return Un nuevo paso.
+     */
+    static <T> Step<T> fromFuture(Supplier<CompletableFuture<T>> futureSupplier, Class<T> returnType) {
+        return new Step<>() {
+            @Override
+            public T execute() throws Exception {
+                return futureSupplier.get().join(); // Usamos join() para esperar el resultado
+            }
+
+            @Override
+            public Class<T> getReturnType() {
+                return returnType;
             }
         };
     }

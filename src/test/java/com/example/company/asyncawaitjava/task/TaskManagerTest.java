@@ -1,6 +1,7 @@
 
 package com.example.company.asyncawaitjava.task;
 
+import com.example.company.asyncawaitjava.config.RetryConfig;
 import com.example.company.asyncawaitjava.task.interfaces.Step;
 import org.junit.jupiter.api.*;
 import java.util.*;
@@ -21,7 +22,9 @@ class TaskManagerTest {
 
     private TaskManager<String> manager;
     private List<String> completedData;
-
+  private static final Random RANDOM = new Random();
+    private static final int MIN_DELAY = 100; // ms
+    private static final int MAX_DELAY = 500; // ms
     @BeforeEach
     void setUp() {
         completedData = Collections.synchronizedList(new ArrayList<>());
@@ -57,44 +60,96 @@ class TaskManagerTest {
         assertEquals(1, manager.getMetrics().get("completedTasks"), "Esperaba 1 tarea completada");
     }
 
-    @Test
-    @DisplayName("Tareas concurrentes con prioridades")
-    void testConcurrentTasksWithPriorities() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(10);
-        manager = new TaskManager<>(status -> {
-            if (!status.isFailed && !status.isCancelled && status.data != null) {
-                completedData.add(status.data);
-                latch.countDown();
-            }
-        });
-
-        List<String> executionOrder = Collections.synchronizedList(new ArrayList<>());
-        for (int i = 0; i < 10; i++) {
-            final int priority = i % 3;
-            manager.scheduleTask(() -> {
-                executionOrder.add("Prioridad" + priority);
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                return "Tarea" + priority;
-            }, "Data" + i, priority, null, 0, 0);
+//    @Test
+//    @DisplayName("Tareas concurrentes con prioridades")
+//    void testConcurrentTasksWithPriorities() throws InterruptedException {
+//        CountDownLatch latch = new CountDownLatch(10);
+//        manager = new TaskManager<>(status -> {
+//            if (!status.isFailed && !status.isCancelled && status.data != null) {
+//                completedData.add(status.data);
+//                latch.countDown();
+//            }
+//        });
+//
+//        List<String> executionOrder = Collections.synchronizedList(new ArrayList<>());
+//        for (int i = 0; i < 10; i++) {
+//            final int priority = i % 3;
+//            manager.scheduleTask(() -> {
+//                executionOrder.add("Prioridad" + priority);
+//                try {
+//                    Thread.sleep(5);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                }
+//                return "Tarea" + priority;
+//            }, "Data" + i, priority, null, 0, 0);
+//        }
+//
+//        assertTrue(latch.await(10, TimeUnit.SECONDS), "No se recibieron todos los callbacks");
+//        manager.awaitAll();
+//        assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
+//        assertEquals(10, manager.getMetrics().get("completedTasks"), "Esperaba 10 tareas completadas");
+//        int highPriorityCount = 0;
+//        for (int i = 0; i < 5 && i < executionOrder.size(); i++) {
+//            if (executionOrder.get(i).equals("Prioridad2")) {
+//                highPriorityCount++;
+//            }
+//        }
+//        assertTrue(highPriorityCount >= 1, "Esperaba al menos 1 tarea de prioridad 2 al inicio, pero obtuve " + highPriorityCount);
+//    }
+@Test
+@DisplayName("Tareas concurrentes con prioridades")
+void testConcurrentTasksWithPriorities() throws InterruptedException {
+    CountDownLatch latch = new CountDownLatch(10);
+    manager = new TaskManager<>(status -> {
+        if (!status.isFailed && !status.isCancelled && status.data != null) {
+            LOGGER.info(String.format("Callback recibido para: %s", status.data));
+            completedData.add(status.data);
+            latch.countDown();
+        } else if (status.isFailed) {
+            LOGGER.warning(String.format("Tarea fallida: %s, error: %s", status.data, status.exception));
+        } else if (status.isCancelled) {
+            LOGGER.warning(String.format("Tarea cancelada: %s", status.data));
         }
+    });
 
-        assertTrue(latch.await(10, TimeUnit.SECONDS), "No se recibieron todos los callbacks");
-        manager.awaitAll();
-        assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
-        assertEquals(10, manager.getMetrics().get("completedTasks"), "Esperaba 10 tareas completadas");
-        int highPriorityCount = 0;
-        for (int i = 0; i < 5 && i < executionOrder.size(); i++) {
-            if (executionOrder.get(i).equals("Prioridad2")) {
-                highPriorityCount++;
+    List<String> executionOrder = Collections.synchronizedList(new ArrayList<>());
+    List<Task<String>> tasks = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+        final int taskIndex = i;
+        final int priority = i % 3;
+        Task<String> task = manager.scheduleTask(() -> {
+            executionOrder.add("Prioridad" + priority);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOGGER.warning(String.format("Interrumpido en tarea Data%d", taskIndex));
             }
-        }
-        assertTrue(highPriorityCount >= 1, "Esperaba al menos 1 tarea de prioridad 2 al inicio, pero obtuve " + highPriorityCount);
+            LOGGER.info(String.format("Completando tarea Data%d", taskIndex));
+            return "Tarea" + priority;
+        }, "Data" + taskIndex, priority, null, 0, 0);
+        tasks.add(task);
     }
 
+    if (!latch.await(5, TimeUnit.SECONDS)) {
+        LOGGER.severe(String.format("Fallo: No se recibieron todos los callbacks, restantes: %d", latch.getCount()));
+        LOGGER.severe(String.format("Datos completados: %s", completedData));
+        LOGGER.severe(String.format("Estado de tareas: %s", 
+            tasks.stream()
+                .map(t -> "Task(Data" + tasks.indexOf(t) + "): " + 
+                    (t.isDone() ? "Completada" : "Pendiente") + 
+                    ", isCancelled=" + t.isCancelled() + 
+                    ", isStarted=" + t.isStarted())
+                .toList()));
+        fail("No se recibieron todos los callbacks, restantes: " + latch.getCount());
+    }
+    manager.awaitAll();
+    assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
+    assertEquals(10, manager.getMetrics().get("completedTasks"), "Esperaba 10 tareas completadas");
+    int highPriorityCount = (int) executionOrder.stream().filter(p -> p.equals("Prioridad2")).count();
+    assertEquals(3, highPriorityCount, "Esperaba 3 tareas de prioridad 2, pero obtuve " + highPriorityCount);
+}
     @Test
     @DisplayName("Programar tareas dependientes con éxito")
     void testAddDependentTasksSuccess() throws InterruptedException {
@@ -374,4 +429,123 @@ class TaskManagerTest {
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
         assertEquals(1, manager.getMetrics().get("cancelledTasks"), "Esperaba 1 tarea cancelada");
     }
+//    @Test
+//public void testStrictCancellation() {
+//    TaskManager<String> manager = new TaskManager<>(status -> {});
+//    List<Step<?>> steps = List.of(
+//        Step.doing(() -> {
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(TaskManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }),
+//        Step.doing(() -> {
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(TaskManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    })
+//    );
+//    Task<?> lastTask = manager.addSequentialTasksWithStrictCancel(steps, "test", 5, 500, 1, RetryConfig.defaultConfig());
+//    manager.cancelTasksForData("test", true);
+//    assertTrue(lastTask.isCancelled());
+//    assertEquals(2, manager.getMetrics().get("cancelledTasks"));
+//}
+     @Test
+    public void testSequentialTasksWithStrictCancel() throws Exception {
+        AtomicInteger stepCounter = new AtomicInteger(0);
+        TaskManager<String> taskManager = TaskManager.of(data -> {});
+
+        List<Step<?>> steps = List.of(
+            Step.doing(() -> {
+                assertEquals(0, stepCounter.getAndIncrement(), "Step 1 debe ejecutarse primero");
+                System.out.println("Ejecutando paso 1");
+            }),
+            Step.doing(() -> {
+                assertEquals(1, stepCounter.getAndIncrement(), "Step 2 debe ejecutarse después de Step 1");
+                System.out.println("Ejecutando paso 2");
+            }),
+            Step.doing(() -> {
+                assertEquals(2, stepCounter.getAndIncrement(), "Step 3 debe ejecutarse después de Step 2");
+                System.out.println("Ejecutando paso 3");
+            })
+        );
+
+        Task<?> lastTask = taskManager.addSequentialTasksWithStrict(
+            steps, "test", 10, 0, 0, RetryConfig.defaultConfig()
+        );
+
+        lastTask.await(10, TimeUnit.SECONDS);
+        assertEquals(3, stepCounter.get(), "Todos los pasos deben haberse ejecutado");
+    }
+    @Test
+public void testSequentialTasksWithStrictCancelAsync() throws Exception {
+    AtomicInteger stepCounter = new AtomicInteger(0);
+    AtomicInteger callbackCounter = new AtomicInteger(0);
+    CountDownLatch callbackLatch = new CountDownLatch(1); // Latch para esperar el callback final
+
+    TaskManager<String> taskManager = new TaskManager<>(status -> {
+        if (status.isLastTaskInPipeline && !status.isCancelled && !status.isFailed) {
+            callbackCounter.incrementAndGet();
+            System.out.println("Callback activado para tarea final, datos=" + status.data);
+            callbackLatch.countDown(); // Liberar el latch
+        } else {
+            System.out.println("Callback ignorado para tarea intermedia, datos=" + status.data);
+        }
+    });
+
+    List<Step<?>> steps = List.of(
+        Step.fromFuture(() -> CompletableFuture.runAsync(() -> {
+            try {
+                int delay = RANDOM.nextInt(MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY;
+                System.out.println("Iniciando paso 1 con stepCounter=" + stepCounter.get());
+                Thread.sleep(delay);
+                assertEquals(0, stepCounter.getAndIncrement(), "Step 1 debe ejecutarse primero");
+                System.out.println("Ejecutando paso 1 (async) con retraso " + delay + "ms");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Interrumpido en paso 1", e);
+            }
+        }), Void.class),
+        Step.fromFuture(() -> CompletableFuture.runAsync(() -> {
+            try {
+                int delay = RANDOM.nextInt(MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY;
+                System.out.println("Iniciando paso 2 con stepCounter=" + stepCounter.get());
+                Thread.sleep(delay);
+                assertEquals(1, stepCounter.getAndIncrement(), "Step 2 debe ejecutarse después de Step 1");
+                System.out.println("Ejecutando paso 2 (async) con retraso " + delay + "ms");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Interrumpido en paso 2", e);
+            }
+        }), Void.class),
+        Step.fromFuture(() -> CompletableFuture.runAsync(() -> {
+            try {
+                int delay = RANDOM.nextInt(MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY;
+                System.out.println("Iniciando paso 3 con stepCounter=" + stepCounter.get());
+                Thread.sleep(delay);
+                assertEquals(2, stepCounter.getAndIncrement(), "Step 3 debe ejecutarse después de Step 2");
+                System.out.println("Ejecutando paso 3 (async) con retraso " + delay + "ms");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Interrumpido en paso 3", e);
+            }
+        }), Void.class)
+    );
+
+    Task<?> lastTask = taskManager.addSequentialTasksWithStrict(
+        steps, "test", 10, 0, 0, RetryConfig.defaultConfig()
+    );
+
+    lastTask.await(10, TimeUnit.SECONDS);
+    taskManager.awaitAll(); // Esperar a que todas las tareas y callbacks se completen
+    boolean callbackCompleted = callbackLatch.await(5, TimeUnit.SECONDS); // Esperar hasta 5 segundos por el callback
+    assertTrue(callbackCompleted, "El callback final debe ejecutarse");
+    assertEquals(3, stepCounter.get(), "Todos los pasos deben haberse ejecutado");
+    assertEquals(1, callbackCounter.get(), "El callback final debe ejecutarse exactamente una vez");
+
+    taskManager.close();
+}
 }

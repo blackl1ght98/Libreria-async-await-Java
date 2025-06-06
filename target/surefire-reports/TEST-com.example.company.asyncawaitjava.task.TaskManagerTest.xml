@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.company.asyncawaitjava.task.TaskManagerTest" time="12.64" tests="9" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.company.asyncawaitjava.task.TaskManagerTest" time="13.614" tests="11" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="24"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,9 +15,8 @@
     <property name="user.country" value="ES"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-24\bin"/>
-    <property name="sun.java.command" value="C:\Users\guill\AppData\Local\Temp\surefire8100871619449188133\surefirebooter-20250604214712191_3.jar C:\Users\guill\AppData\Local\Temp\surefire8100871619449188133 2025-06-04T21-47-11_996-jvmRun1 surefire-20250604214712191_1tmp surefire_0-20250604214712191_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\guill\AppData\Local\Temp\surefire4489832995051668458\surefirebooter-20250606211341253_3.jar C:\Users\guill\AppData\Local\Temp\surefire4489832995051668458 2025-06-06T21-13-41_034-jvmRun1 surefire-20250606211341253_1tmp surefire_0-20250606211341253_2tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="test" value="com.example.company.asyncawaitjava.task.TaskManagerTest"/>
     <property name="surefire.test.class.path" value="C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\target\test-classes;C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\target\classes;C:\Users\guill\.m2\repository\org\javassist\javassist\3.30.2-GA\javassist-3.30.2-GA.jar;C:\Users\guill\.m2\repository\com\squareup\javapoet\1.13.0\javapoet-1.13.0.jar;C:\Users\guill\.m2\repository\javax\annotation\javax.annotation-api\1.3.2\javax.annotation-api-1.3.2.jar;C:\Users\guill\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\guill\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\guill\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\guill\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\guill\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\guill\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
     <property name="user.home" value="C:\Users\guill"/>
@@ -33,7 +32,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\guill\AppData\Local\Temp\surefire8100871619449188133\surefirebooter-20250604214712191_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\guill\AppData\Local\Temp\surefire4489832995051668458\surefirebooter-20250606211341253_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="24+36-3646"/>
@@ -62,281 +61,440 @@
     <property name="java.vm.version" value="24+36-3646"/>
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="68.0"/>
-    <property name="argLine" value="--enable-preview"/>
   </properties>
-  <testcase name="testLongRunningTask" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="3.094">
-    <system-err><![CDATA[jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@76908cc0, datos=LongData, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@76908cc0, datos=LongData
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@363ee3a2[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@79b06cab[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@1622f1b[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+  <testcase name="testLongRunningTask" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="3.098">
+    <system-err><![CDATA[jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@3c130745, datos=LongData, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@3c130745, datos=LongData
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@3c130745, datos=LongData
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@6ef888f6[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@69b2283a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@9225652[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 1, canceladas: 0, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testAddDependentTasksSuccess" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.032">
-    <system-err><![CDATA[jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksSuccess$1
+  <testcase name="testAddDependentTasksSuccess" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.037">
+    <system-err><![CDATA[jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksSuccess$1
 INFO: Ejecutando Tarea1
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksSuccess$2
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksSuccess$2
 INFO: Ejecutando Tarea2
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@56620197, datos=mi1-archivo.txt, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksSuccess$3
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@1d9b7cce, datos=mi1-archivo.txt, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@1d9b7cce, datos=mi1-archivo.txt
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@1d9b7cce, datos=mi1-archivo.txt
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@5fdcaa40, datos=mi1-archivo.txt, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksSuccess$3
 INFO: Ejecutando Tarea3
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@56620197, datos=mi1-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@333291e3, datos=mi1-archivo.txt, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@333291e3, datos=mi1-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager addDependentTasks
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@5fdcaa40, datos=mi1-archivo.txt
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5fdcaa40, datos=mi1-archivo.txt
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager addDependentTasks
 INFO: Programadas 3 tareas dependientes: data=mi1-archivo.txt, priority=1
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@795cd85e, datos=mi1-archivo.txt, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@795cd85e, datos=mi1-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=3}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=3}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@7722c3c3[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@243c4f91[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 6] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@123ef382[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@71809907, datos=mi1-archivo.txt, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@71809907, datos=mi1-archivo.txt
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@71809907, datos=mi1-archivo.txt
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=3, failedTasks=0}
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=3, failedTasks=0}
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@192d43ce[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@333291e3[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 6] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@158da8e[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 3, canceladas: 0, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testAddDependentTasksFailure" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.028">
-    <system-err><![CDATA[jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksFailure$1
+  <testcase name="testSequentialTasksWithStrictCancelAsync" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.934">
+    <system-out><![CDATA[Iniciando paso 1 con stepCounter=0
+Ejecutando paso 1 (async) con retraso 345ms
+Callback ignorado para tarea intermedia, datos=test
+Iniciando paso 2 con stepCounter=1
+Ejecutando paso 2 (async) con retraso 189ms
+Callback ignorado para tarea intermedia, datos=test
+Iniciando paso 3 con stepCounter=2
+Ejecutando paso 3 (async) con retraso 335ms
+Callback activado para tarea final, datos=test
+]]></system-out>
+    <system-err><![CDATA[jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager addSequentialTasksWithStrict
+INFO: Programadas 3 tareas secuenciales con cancelación estricta: data=test, priority=10
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@5876a9af, datos=test, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@5876a9af, datos=test
+jun 06, 2025 9:13:45 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5876a9af, datos=test
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@2a798d51, datos=test, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@2a798d51, datos=test
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@2a798d51, datos=test
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=2, failedTasks=0}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@37afeb11, datos=test, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@37afeb11, datos=test
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@37afeb11, datos=test
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=3, failedTasks=0}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@4567f35d[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4f6ee6e4[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 9] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@245b4bdc[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+INFO: TaskManager cerrado, tareas activas: 0, completadas: 3, canceladas: 0, fallidas: 0, timedOut: 0
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@47af7f3d[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@44ebcd03[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@5af3afd9[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 0, fallidas: 0, timedOut: 0
+]]></system-err>
+  </testcase>
+  <testcase name="testAddDependentTasksFailure" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.036">
+    <system-err><![CDATA[jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksFailure$1
 INFO: Ejecutando Tarea1
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksFailure$2
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksFailure$2
 INFO: Ejecutando Tarea2
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
 WARNING: Error tras 1 intentos, reintentos=0: Error ejecutando paso en tarea dependiente: mi2-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@32eff876, datos=mi2-archivo.txt, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksFailure$3
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@36902638, datos=mi2-archivo.txt, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAddDependentTasksFailure$3
 INFO: Ejecutando Tarea3
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@32eff876, datos=mi2-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
-WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Error ejecutando la tarea tras 1 intentos
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager addDependentTasks
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@36902638, datos=mi2-archivo.txt
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@36902638, datos=mi2-archivo.txt
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+WARNING: Task execution failed: Error ejecutando la tarea tras 1 intentos
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager addDependentTasks
 INFO: Programadas 3 tareas dependientes: data=mi2-archivo.txt, priority=1
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@3ce1e309, datos=mi2-archivo.txt, isCancelled=false, isFailed=true
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.Task cancel
-INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@47af7f3d, cancelled=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@47af7f3d, datos=mi2-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cancelTask
-INFO: Cancelación de tarea exitosa: tarea=com.example.company.asyncawaitjava.task.Task@47af7f3d, datos=mi2-archivo.txt, autoCancel=false, métricas={failedTasks=1, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@3ce1e309, datos=mi2-archivo.txt
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=1, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=1, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@14dd9eb7[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@6c80d78a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 6] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@661972b0[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@74fe5c40, datos=mi2-archivo.txt, isCancelled=false, isFailed=true
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.Task cancel
+INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@158d2680, cancelled=false
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@158d2680, datos=mi2-archivo.txt
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cancelTask
+INFO: Cancelación de tarea exitosa: tarea=com.example.company.asyncawaitjava.task.Task@158d2680, datos=mi2-archivo.txt, autoCancel=false, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1, failedTasks=1}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@74fe5c40, datos=mi2-archivo.txt
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1, failedTasks=1}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1, failedTasks=1}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@38c6f217[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@1189dd52[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 6] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@57a3af25[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 1, canceladas: 1, fallidas: 1, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testScheduleTaskSuccess" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.023">
-    <system-err><![CDATA[jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@4fb61f4a, datos=TestData, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@4fb61f4a, datos=TestData
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@4f18837a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@1fa268de[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@7b9a4292[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+  <testcase name="testScheduleTaskSuccess" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.016">
+    <system-err><![CDATA[jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@2f9f7dcf, datos=TestData, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@2f9f7dcf, datos=TestData
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@2f9f7dcf, datos=TestData
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@9597028[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@67c27493[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@1bd4fdd[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 1, canceladas: 0, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testRetries" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.318">
-    <system-err><![CDATA[jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
+  <testcase name="testRetries" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.322">
+    <system-err><![CDATA[jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
 WARNING: Error tras 3 intentos, reintentos=2: Fallo intencional
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
-WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Error ejecutando la tarea tras 3 intentos
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@52bf72b5, datos=RetryData, isCancelled=false, isFailed=true
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@52bf72b5, datos=RetryData
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=1, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=0}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=1, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=0}
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@59309333[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@7ec7ffd3[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@dd8ba08[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:16 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+WARNING: Task execution failed: Error ejecutando la tarea tras 3 intentos
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@689604d9, datos=RetryData, isCancelled=false, isFailed=true
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@689604d9, datos=RetryData
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=0, failedTasks=1}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=0, failedTasks=1}
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@f6efaab[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@351d00c0[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4c371370[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:46 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 0, fallidas: 1, timedOut: 0
 ]]></system-err>
   </testcase>
   <testcase name="testAbruptClose" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="5.01">
-    <system-err><![CDATA[jun 04, 2025 9:47:17 P. M. com.example.company.asyncawaitjava.task.Task cancel
-INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@7e07db1f, cancelled=true
-jun 04, 2025 9:47:17 P. M. com.example.company.asyncawaitjava.task.Task cancel
+    <system-err><![CDATA[jun 06, 2025 9:13:47 P. M. com.example.company.asyncawaitjava.task.Task cancel
+INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@48f2bd5b, cancelled=true
+jun 06, 2025 9:13:47 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Interrupted task thread: TaskManager-Executor-1
-jun 04, 2025 9:47:17 P. M. com.example.company.asyncawaitjava.task.TaskManager executeWithRetries
+jun 06, 2025 9:13:47 P. M. com.example.company.asyncawaitjava.task.TaskManager executeWithRetries
 WARNING: Interrumpido durante la ejecución de la tarea, reintentos=0
-jun 04, 2025 9:47:17 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
-WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Interrumpido durante la ejecución de la tarea
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@72d1ad2e[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@399f45b1[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@478190fc[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 06, 2025 9:13:47 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+WARNING: Task execution failed: Interrumpido durante la ejecución de la tarea
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@5c6648b0[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4d5d943d[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@7cc0cdad[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 1, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testConcurrentTasksWithPriorities" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.048">
-    <system-err><![CDATA[jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@6adbc9d, datos=Data0, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@6adbc9d, datos=Data0
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@49139829, datos=Data1, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@49139829, datos=Data1
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@1b7cc17c, datos=Data2, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@1b7cc17c, datos=Data2
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@67c27493, datos=Data3, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@67c27493, datos=Data3
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@5b8dfcc1, datos=Data4, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5b8dfcc1, datos=Data4
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@35e2d654, datos=Data5, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@35e2d654, datos=Data5
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@4f83df68, datos=Data6, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@4f83df68, datos=Data6
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@130d63be, datos=Data7, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@130d63be, datos=Data7
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@6aeb35e6, datos=Data8, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@6aeb35e6, datos=Data8
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@74f0ea28, datos=Data9, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@74f0ea28, datos=Data9
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=10}
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=10}
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@131774fe[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 10] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@77847718[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 20] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@3c19aaa5[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+  <testcase name="testConcurrentTasksWithPriorities" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.059">
+    <system-err><![CDATA[jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data0
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data1
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@639c2c1d, datos=Data0, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@639c2c1d, datos=Data0
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data0
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data2
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data3
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@639c2c1d, datos=Data0
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@74235045, datos=Data1, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data4
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data5
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@74235045, datos=Data1
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data1
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@74235045, datos=Data1
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@5e0e82ae, datos=Data2, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@5e0e82ae, datos=Data2
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data2
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5e0e82ae, datos=Data2
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@6b2ea799, datos=Data3, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data6
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@6b2ea799, datos=Data3
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@6b2ea799, datos=Data3
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data3
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@36fc695d, datos=Data4, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@36fc695d, datos=Data4
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@36fc695d, datos=Data4
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data4
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@3754a4bf, datos=Data5, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@3754a4bf, datos=Data5
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data5
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@3754a4bf, datos=Data5
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@175c2241, datos=Data6, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@175c2241, datos=Data6
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data6
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data7
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@175c2241, datos=Data6
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@1d296da, datos=Data7, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@1d296da, datos=Data7
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data7
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@1d296da, datos=Data7
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data8
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$1
+INFO: Completando tarea Data9
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@557caf28, datos=Data8, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@557caf28, datos=Data8
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data8
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@557caf28, datos=Data8
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@6c6cb480, datos=Data9, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@6c6cb480, datos=Data9
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@6c6cb480, datos=Data9
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testConcurrentTasksWithPriorities$0
+INFO: Callback recibido para: Data9
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=10, failedTasks=0}
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=10, failedTasks=0}
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@7b98f307[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 10] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@1bb5a082[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 20] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@c730b35[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 10, canceladas: 0, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testCancelTask" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="2.008">
-    <system-err><![CDATA[jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.Task cancel
-INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@2a65fe7c, cancelled=true
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.Task cancel
+  <testcase name="testCancelTask" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="2.007">
+    <system-err><![CDATA[jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.Task cancel
+INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@5542c4ed, cancelled=true
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.Task cancel
 INFO: Interrupted task thread: TaskManager-Executor-1
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager executeWithRetries
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager executeWithRetries
 WARNING: Interrumpido durante la ejecución de la tarea, reintentos=0
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
-WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Interrumpido durante la ejecución de la tarea
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@2a65fe7c, datos=CancelManual
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager cancelTask
-INFO: Cancelación de tarea exitosa: tarea=com.example.company.asyncawaitjava.task.Task@2a65fe7c, datos=CancelManualCallback, autoCancel=false, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=0}
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=0}
-jun 04, 2025 9:47:21 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=0}
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@689604d9[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@799f10e1[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@2a4fb17b[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+WARNING: Task execution failed: Interrumpido durante la ejecución de la tarea
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5542c4ed, datos=CancelManual
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager cancelTask
+INFO: Cancelación de tarea exitosa: tarea=com.example.company.asyncawaitjava.task.Task@5542c4ed, datos=CancelManualCallback, autoCancel=false, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=0, failedTasks=0}
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=0, failedTasks=0}
+jun 06, 2025 9:13:51 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=0, failedTasks=0}
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@22ff4249[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4c12331b[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 2] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@dd05255[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 1, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testAutoCancelLastDependentTask" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="2.016">
-    <system-err><![CDATA[jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAutoCancelLastDependentTask$1
+  <testcase name="testAutoCancelLastDependentTask" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="2.015">
+    <system-err><![CDATA[jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAutoCancelLastDependentTask$1
 INFO: Ejecutando Tarea1
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAutoCancelLastDependentTask$2
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@3eb738bb, datos=mi3-archivo.txt, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerTest lambda$testAutoCancelLastDependentTask$2
 INFO: Ejecutando Tarea2
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@3270d194, datos=mi3-archivo.txt, isCancelled=false, isFailed=false
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager addDependentTasks
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@3eb738bb, datos=mi3-archivo.txt
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@3eb738bb, datos=mi3-archivo.txt
+jun 06, 2025 9:13:53 P. M. com.example.company.asyncawaitjava.task.TaskManager addDependentTasks
 INFO: Programadas 2 tareas dependientes: data=mi3-archivo.txt, priority=0
-jun 04, 2025 9:47:23 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@3270d194, datos=mi3-archivo.txt
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.Task cancel
-INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@76505305, cancelled=true
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.Task cancel
-INFO: Interrupted task thread: TaskManager-Executor-2
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.TaskManager executeWithRetries
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.Task cancel
+INFO: Task cancellation: task=com.example.company.asyncawaitjava.task.Task@3cd3e762, cancelled=true
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.Task cancel
+INFO: Interrupted task thread: TaskManager-Executor-3
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.TaskManager executeWithRetries
 WARNING: Interrumpido durante la ejecución de la tarea, reintentos=0
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$1
-WARNING: Task execution failed: com.example.company.asyncawaitjava.task.Task$TaskException: Interrumpido durante la ejecución de la tarea
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@76505305, datos=mi3-archivo.txt
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.TaskManager cancelTask
-INFO: Cancelación de tarea exitosa: tarea=com.example.company.asyncawaitjava.task.Task@76505305, datos=mi3-archivo.txt, autoCancel=true, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1}
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1}
-jun 04, 2025 9:47:24 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={failedTasks=0, timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1}
-jun 04, 2025 9:47:25 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@4c583ecf[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:25 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@48f2bd5b[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 4] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:25 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4802796d[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 04, 2025 9:47:25 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+WARNING: Task execution failed: Interrumpido durante la ejecución de la tarea
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@3cd3e762, datos=mi3-archivo.txt
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.TaskManager cancelTask
+INFO: Cancelación de tarea exitosa: tarea=com.example.company.asyncawaitjava.task.Task@3cd3e762, datos=mi3-archivo.txt, autoCancel=true, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:54 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=1, completedTasks=1, failedTasks=0}
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@217ed35e[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 4] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@3eb25e1a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 4] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4116aac9[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 1, canceladas: 1, fallidas: 0, timedOut: 0
+]]></system-err>
+  </testcase>
+  <testcase name="testSequentialTasksWithStrictCancel" classname="com.example.company.asyncawaitjava.task.TaskManagerTest" time="0.023">
+    <system-out><![CDATA[Ejecutando paso 1
+Ejecutando paso 2
+Ejecutando paso 3
+]]></system-out>
+    <system-err><![CDATA[jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager addSequentialTasksWithStrict
+INFO: Programadas 3 tareas secuenciales con cancelación estricta: data=test, priority=10
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@1c1bbc4e, datos=test, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@1c1bbc4e, datos=test
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@1c1bbc4e, datos=test
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@1ce24091, datos=test, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@1ce24091, datos=test
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@1ce24091, datos=test
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@24269709, datos=test, isCancelled=false, isFailed=false
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@74e52ef6[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@198b6731[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@489115ef[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 0, fallidas: 0, timedOut: 0
+jun 06, 2025 9:13:55 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@24269709, datos=test
 ]]></system-err>
   </testcase>
 </testsuite>
