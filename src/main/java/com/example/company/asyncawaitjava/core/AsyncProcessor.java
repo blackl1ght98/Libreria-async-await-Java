@@ -1,3 +1,4 @@
+
 package com.example.company.asyncawaitjava.core;
 
 import com.example.company.asyncawaitjava.task.Task;
@@ -89,13 +90,42 @@ public class AsyncProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(TypeName.get(enclosingClass.asType()));
 
-        // Constructor
-        MethodSpec constructor = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(String.class, "name")
-                .addStatement("super(name)")
-                .build();
-        wrapperClassBuilder.addMethod(constructor);
+        // Obtener los constructores de la clase original
+        List<ExecutableElement> constructors = enclosingClass.getEnclosedElements().stream()
+                .filter(e -> e.getKind() == ElementKind.CONSTRUCTOR)
+                .map(e -> (ExecutableElement) e)
+                .collect(Collectors.toList());
+
+        // Si no hay constructores explícitos, generar un constructor sin parámetros
+        if (constructors.isEmpty()) {
+            MethodSpec constructor = MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PUBLIC)
+                    .addStatement("super()")
+                    .build();
+            wrapperClassBuilder.addMethod(constructor);
+            messager.printMessage(Diagnostic.Kind.NOTE, "Generated default constructor for " + asyncClassName);
+        } else {
+            // Generar un constructor por cada constructor de la clase original
+            for (ExecutableElement constructor : constructors) {
+                List<ParameterSpec> parameters = constructor.getParameters().stream()
+                        .map(param -> ParameterSpec.builder(TypeName.get(param.asType()), param.getSimpleName().toString()).build())
+                        .collect(Collectors.toList());
+                String paramNames = parameters.stream()
+                        .map(param -> param.name)
+                        .collect(Collectors.joining(", "));
+
+                MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameters(parameters)
+                        .addStatement("super($L)", paramNames);
+
+                // Añadir excepciones declaradas
+                constructor.getThrownTypes().forEach(thrownType -> constructorBuilder.addException(TypeName.get(thrownType)));
+
+                wrapperClassBuilder.addMethod(constructorBuilder.build());
+                messager.printMessage(Diagnostic.Kind.NOTE, "Generated constructor with parameters for " + asyncClassName);
+            }
+        }
 
         // Generar métodos asíncronos para @Async
         for (ExecutableElement method : asyncMethods) {

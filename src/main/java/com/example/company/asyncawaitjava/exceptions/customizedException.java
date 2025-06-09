@@ -17,4 +17,13 @@ public class customizedException {
             super(message, cause);
         }
     }
+       /**
+     * Exception thrown when a task encounters an error during execution or
+     * awaiting.
+     */
+    public static class TaskException extends RuntimeException {
+        public TaskException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 }

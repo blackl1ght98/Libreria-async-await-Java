@@ -1,10 +1,11 @@
 package com.example.company.asyncawaitjava.task;
 
 import com.example.company.asyncawaitjava.config.RetryConfig;
+import com.example.company.asyncawaitjava.exceptions.customizedException.TaskException;
 import com.example.company.asyncawaitjava.task.interfaces.TaskAction;
 import com.example.company.asyncawaitjava.task.interfaces.Step;
 import com.example.company.asyncawaitjava.exceptions.customizedException.TaskManagerException;
-import com.example.company.asyncawaitjava.task.Task.TaskException;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,25 +22,43 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
- * Un administrador de tareas robusto y seguro para subprocesos que permite
- * programar y ejecutar tareas asíncronas con prioridades, dependencias,
- * cancelaciones automáticas, reintentos y callbacks de estado.
+ * A robust, thread-safe task manager for scheduling and executing asynchronous
+ * tasks with support for priorities, dependencies, automatic cancellations,
+ * retries, and status callbacks.
  *
- * @param <T> El tipo de datos asociado con las tareas.
+ * Example usage: ```java // Create a TaskManager with a callback for task
+ * completion TaskManager<String> taskManager = TaskManager.of(data ->
+ * System.out.println("Task completed with data: " + data));
+ *
+ * // Define a step Step<String> step = () -> "Processed data";
+ *
+ * // Schedule a single task Task<String> task = taskManager.scheduleTask( ()
+ * -> "Task result", "Task1", 1, null, 5000, 2);
+ *
+ * // Schedule sequential tasks with strict cancellation List<Step<?>> steps =
+ * List.of(() -> "Step 1", () -> "Step 2");
+ * taskManager.addSequentialTasksWithStrict(steps, "SequentialTask", 2, 5000, 2,
+ * RetryConfig.defaultConfig());
+ *
+ * // Wait for all tasks to complete try { taskManager.awaitAll(); } catch
+ * (InterruptedException e) { e.printStackTrace(); }
+ *
+ * // Close the TaskManager taskManager.close(); ```
+ *
+ * @param <T> The type of data associated with the tasks.
  */
 public class TaskManager<T> {
 
     private static final Logger LOGGER = Logger.getLogger(TaskManager.class.getName());
 
-    // Constantes para configuraciones predeterminadas
+    // Default configuration constants
     private static final int DEFAULT_SCHEDULER_POOL_SIZE = Math.min(4, Runtime.getRuntime().availableProcessors());
     private static final int DEFAULT_TASK_EXECUTOR_POOL_SIZE = Math.max(16, Runtime.getRuntime().availableProcessors() * 2);
     private static final int DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE = Math.max(4, Runtime.getRuntime().availableProcessors());
-
     private static final long SHUTDOWN_TIMEOUT_SECONDS = 5L;
     private static final long AWAIT_ALL_TIMEOUT_SECONDS = 30L;
     private static final long MAX_BACKOFF_MS = 10000L;
-    private static final long TASK_TIMEOUT_MS = 30000L; // 30 segundos por defecto
+    private static final long TASK_TIMEOUT_MS = 30000L;
 
     private final ConcurrentSkipListSet<TaskEntry<T>> tasks = new ConcurrentSkipListSet<>((a, b) -> Integer.compare(b.priority, a.priority));
     private final Map<Task<?>, TaskEntry<T>> taskData = new ConcurrentHashMap<>();
@@ -58,14 +77,17 @@ public class TaskManager<T> {
     private final Lock readLock = lock.readLock();
     private final Lock writeLock = lock.writeLock();
 
-    // Métricas
+    // Metrics for tracking task execution
     private final AtomicLong completedTasksCount = new AtomicLong();
     private final AtomicLong cancelledTasksCount = new AtomicLong();
     private final AtomicLong failedTasksCount = new AtomicLong();
     private final AtomicLong timedOutTasksCount = new AtomicLong();
 
     /**
-     * Construye un TaskManager con una retrollamada de finalización.
+     * Constructs a TaskManager with a completion callback and default
+     * executors.
+     *
+     * @param onTaskComplete The callback to invoke when a task completes.
      */
     public TaskManager(Consumer<TaskStatus<T>> onTaskComplete) {
         this(onTaskComplete, Executors.newScheduledThreadPool(DEFAULT_SCHEDULER_POOL_SIZE, new NamedThreadFactory("TaskManager-Scheduler")),
@@ -74,14 +96,24 @@ public class TaskManager<T> {
     }
 
     /**
-     * Construye un TaskManager con un programador y ejecutor personalizados.
+     * Constructs a TaskManager with custom scheduler and task executor.
+     *
+     * @param onTaskComplete The callback to invoke when a task completes.
+     * @param scheduler The scheduler for task cancellations and retries.
+     * @param taskExecutor The executor for task execution.
      */
     public TaskManager(Consumer<TaskStatus<T>> onTaskComplete, ScheduledExecutorService scheduler, ExecutorService taskExecutor) {
         this(onTaskComplete, scheduler, taskExecutor, Executors.newFixedThreadPool(DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE, new NamedThreadFactory("TaskManager-Callback")), TASK_TIMEOUT_MS);
     }
 
     /**
-     * Construye un TaskManager con todos los ejecutores personalizados.
+     * Constructs a TaskManager with all custom executors and timeout.
+     *
+     * @param onTaskComplete The callback to invoke when a task completes.
+     * @param scheduler The scheduler for task cancellations and retries.
+     * @param taskExecutor The executor for task execution.
+     * @param callbackExecutor The executor for completion callbacks.
+     * @param taskTimeoutMs The timeout for tasks in milliseconds.
      */
     public TaskManager(Consumer<TaskStatus<T>> onTaskComplete, ScheduledExecutorService scheduler, ExecutorService taskExecutor, ExecutorService callbackExecutor, long taskTimeoutMs) {
         this.onTaskComplete = Objects.requireNonNull(onTaskComplete, "El callback de finalización no puede ser nulo");
@@ -90,7 +122,6 @@ public class TaskManager<T> {
                 DEFAULT_TASK_EXECUTOR_POOL_SIZE, DEFAULT_TASK_EXECUTOR_POOL_SIZE,
                 0L, TimeUnit.MILLISECONDS,
                 new PriorityBlockingQueue<>(11, (r1, r2) -> {
-                    // Asegurar que las prioridades se comparen correctamente
                     if (r1 instanceof PriorityRunnable pr1 && r2 instanceof PriorityRunnable pr2) {
                         return Integer.compare(pr2.getPriority(), pr1.getPriority()); // Mayor prioridad primero
                     }
@@ -106,7 +137,10 @@ public class TaskManager<T> {
     }
 
     /**
-     * Crea un TaskManager con un consumidor de datos simple.
+     * Creates a TaskManager with a simple data consumer.
+     *
+     * @param onTaskComplete The consumer to process task result data.
+     * @return A new TaskManager instance.
      */
     public static <T> TaskManager<T> of(Consumer<T> onTaskComplete) {
         return new TaskManager<>(status -> {
@@ -116,6 +150,13 @@ public class TaskManager<T> {
         });
     }
 
+    /**
+     * Converts an array of actions into a list of suppliers.
+     *
+     * @param actions The actions to convert.
+     * @return A list of suppliers.
+     * @throws IllegalArgumentException If no actions are provided.
+     */
     @SafeVarargs
     public static <R> List<Supplier<R>> actions(Supplier<R>... actions) {
         if (actions == null || actions.length == 0) {
@@ -124,10 +165,20 @@ public class TaskManager<T> {
         return Arrays.asList(actions);
     }
 
+    /**
+     * Creates a builder for executing an action after all specified tasks
+     * complete.
+     *
+     * @param tasks The tasks to wait for.
+     * @return A WhenAllBuilder instance.
+     */
     public WhenAllBuilder<T> whenAll(Task<?>... tasks) {
         return new WhenAllBuilder<>(this, tasks);
     }
 
+    /**
+     * Builder for executing an action after all specified tasks complete.
+     */
     public class WhenAllBuilder<T> {
 
         private final TaskManager<T> taskManager;
@@ -144,6 +195,21 @@ public class TaskManager<T> {
             }
         }
 
+       /**
+     * Executes the provided action after all tasks complete.
+     *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * Task<String> task1 = taskManager.scheduleTask(() -> "Task 1", "Data1", 1, null, 5000, 2);
+     * Task<String> task2 = taskManager.scheduleTask(() -> "Task 2", "Data2", 1, null, 5000, 2);
+     * Task<Void> finalTask = taskManager.whenAll(task1, task2).thenRun(() -> System.out.println("All tasks done"));
+     * System.out.println(finalTask.isDone()); // Prints false initially
+     * ```
+     *
+     * @param action The action to execute.
+     * @return A Task representing the action.
+     */
         public Task<Void> thenRun(Runnable action) {
             Objects.requireNonNull(action, "Action cannot be null");
             CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
@@ -172,10 +238,42 @@ public class TaskManager<T> {
         }
     }
 
+    /**
+     * Schedules a task with the specified parameters.
+     *
+     * @param action The task action.
+     * @param data The associated data.
+     * @param priority The task priority.
+     * @param dependsOn The tasks this task depends on.
+     * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+     * @param maxRetries The maximum number of retries.
+     * @return The scheduled Task.
+     */
     public <R> Task<R> scheduleTask(Supplier<R> action, T data, int priority, Set<Task<?>> dependsOn, int autoCancelAfterMs, int maxRetries) {
         return scheduleTask(action, data, priority, dependsOn, autoCancelAfterMs, maxRetries, RetryConfig.defaultConfig());
     }
 
+  /**
+ * Schedules a task with custom retry configuration.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * Task<String> task = taskManager.scheduleTask(
+ *     () -> "Task result", "TaskData", 1, null, 5000, 2, RetryConfig.defaultConfig()
+ * );
+ * System.out.println(task.isDone()); // Prints false initially
+ * ```
+ *
+ * @param action The task action.
+ * @param data The associated data.
+ * @param priority The task priority.
+ * @param dependsOn The tasks this task depends on.
+ * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+ * @param maxRetries The maximum number of retries.
+ * @param retryConfig The retry configuration.
+ * @return The scheduled Task.
+ */
     public <R> Task<R> scheduleTask(Supplier<R> action, T data, int priority, Set<Task<?>> dependsOn, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig) {
         validateParameters(action, autoCancelAfterMs, maxRetries, retryConfig);
         closeLock.lock();
@@ -185,11 +283,10 @@ public class TaskManager<T> {
             }
             boolean hasAutoCancel = autoCancelAfterMs > 0;
             Supplier<R> wrappedAction = () -> executeWithRetries(action, null, maxRetries, retryConfig);
-            Task<R> task = Task.execute(wrappedAction, taskExecutor, priority); // Pasar prioridad
+            Task<R> task = Task.execute(wrappedAction, taskExecutor, priority);
             TaskEntry<T> entry = new TaskEntry<>(task, data, priority, dependsOn, hasAutoCancel);
             checkCircularDependencies(task, dependsOn);
 
-            // Verificar dependencias canceladas antes de añadir la tarea
             if (dependsOn != null && dependsOn.stream()
                     .map(taskData::get)
                     .filter(Objects::nonNull)
@@ -221,129 +318,462 @@ public class TaskManager<T> {
         }
     }
 
-    private <R> R executeWithRetries(Supplier<R> action, Task<?> task, int maxRetries, RetryConfig retryConfig) {
-        CompletableFuture<R> future = new CompletableFuture<>();
-        AtomicInteger attempts = new AtomicInteger(0);
-        AtomicLong totalRetryTimeMs = new AtomicLong(0);
-        final long maxTotalRetryTimeMs = 30_000;
-        long startTime = System.currentTimeMillis();
+    /**
+     * Executes an action with retries according to the retry configuration.
+     *
+     * @param action The action to execute.
+     * @param task The associated task, if any.
+     * @param maxRetries The maximum number of retries.
+     * @param retryConfig The retry configuration.
+     * @return The result of the action.
+     * @throws TaskManagerException If the task fails after retries.
+     */
+ private <R> R executeWithRetries(Supplier<R> action, Task<?> task, int maxRetries, RetryConfig retryConfig) {
+    CompletableFuture<R> future = new CompletableFuture<>();
+    AtomicInteger attempts = new AtomicInteger(0);
+    AtomicLong totalRetryTimeMs = new AtomicLong(0);
+    final long maxTotalRetryTimeMs = 30_000;
+    long startTime = System.currentTimeMillis();
 
-        class RetryAttempt {
+    // Usar maxAttempts de retryConfig si es mayor que maxRetries
+    int effectiveMaxRetries = retryConfig != null && retryConfig.getMaxAttempts() > 0 ? retryConfig.getMaxAttempts() : maxRetries;
 
-            private void attempt() {
-                if (isClosed || (task != null && task.future.isCancelled())) {
-                    future.completeExceptionally(new TaskManagerException("Tarea cancelada o TaskManager cerrado", null));
-                    return;
-                }
-                if (attempts.get() > maxRetries) {
+    class RetryAttempt {
+        private void attempt() {
+            int currentAttempt = attempts.incrementAndGet(); // Incrementar al inicio
+            if (isClosed || (task != null && task.future.isCancelled())) {
+                future.completeExceptionally(new TaskManagerException("Tarea cancelada o TaskManager cerrado", null));
+                return;
+            }
+            if (currentAttempt > effectiveMaxRetries) {
+                future.completeExceptionally(new TaskManagerException(
+                        "Máximo de reintentos excedido tras %d intentos".formatted(currentAttempt), null));
+                return;
+            }
+            if (totalRetryTimeMs.get() + (System.currentTimeMillis() - startTime) > maxTotalRetryTimeMs) {
+                future.completeExceptionally(new TaskManagerException(
+                        "Tiempo total de reintentos excedido tras %d intentos".formatted(currentAttempt), null));
+                return;
+            }
+
+            try {
+                R result = action.get();
+                LOGGER.fine("Tarea ejecutada exitosamente en intento %d, reintentos=%d"
+                        .formatted(currentAttempt, currentAttempt - 1));
+                future.complete(result);
+            } catch (Throwable t) {
+                if (!retryConfig.retryableException.test(t)) {
+                    LOGGER.warning("Excepción no reintentable tras %d intentos: %s"
+                            .formatted(currentAttempt, t.getMessage()));
                     future.completeExceptionally(new TaskManagerException(
-                            "Máximo de reintentos excedido tras %d intentos".formatted(attempts.get()), null));
+                            "Excepción no reintentable tras %d intentos".formatted(currentAttempt), t));
                     return;
                 }
-                if (totalRetryTimeMs.get() + (System.currentTimeMillis() - startTime) > maxTotalRetryTimeMs) {
+
+                if (currentAttempt >= effectiveMaxRetries) {
+                    LOGGER.warning("Error tras %d intentos, reintentos=%d: %s"
+                            .formatted(currentAttempt, currentAttempt - 1, t.getMessage()));
                     future.completeExceptionally(new TaskManagerException(
-                            "Tiempo total de reintentos excedido tras %d intentos".formatted(attempts.get()), null));
+                            "Error tras %d intentos".formatted(currentAttempt), t));
                     return;
                 }
 
-                try {
-                    R result = action.get();
-                    LOGGER.fine("Tarea ejecutada exitosamente en intento %d, reintentos=%d"
-                            .formatted(attempts.get() + 1, attempts.get()));
-                    future.complete(result);
-                } catch (Throwable t) {
-                    if (!retryConfig.retryableException.test(t) || attempts.incrementAndGet() > maxRetries) {
-                        LOGGER.warning("Error tras %d intentos, reintentos=%d: %s"
-                                .formatted(attempts.get(), attempts.get() - 1, t.getMessage()));
-                        future.completeExceptionally(new TaskManagerException(
-                                "Error tras %d intentos".formatted(attempts.get()), t));
-                        return;
-                    }
+                long delay = Math.min(
+                        retryConfig.backoffBaseMs * (long) Math.pow(2, Math.min(currentAttempt - 1, retryConfig.maxBackoffExponent)),
+                        MAX_BACKOFF_MS
+                );
+                totalRetryTimeMs.addAndGet(delay);
 
-                    long delay = Math.min(
-                            retryConfig.backoffBaseMs * (long) Math.pow(2, Math.min(attempts.get() - 1, retryConfig.maxBackoffExponent)),
-                            MAX_BACKOFF_MS
-                    );
-                    totalRetryTimeMs.addAndGet(delay);
-
-                    LOGGER.fine("Programando reintento tras fallo en intento %d, retraso=%dms, reintentos=%d"
-                            .formatted(attempts.get(), delay, attempts.get()));
-                    ScheduledFuture<?> retryFuture = scheduler.schedule(
-                            this::attempt, delay, TimeUnit.MILLISECONDS);
-                    if (task != null) {
-                        taskToCancellation.compute(task, (k, existing) -> {
-                            if (existing != null) {
-                                existing.cancel(false);
-                            }
-                            return retryFuture;
-                        });
-                    }
+                LOGGER.fine("Programando reintento tras fallo en intento %d, retraso=%dms, reintentos=%d"
+                        .formatted(currentAttempt, delay, currentAttempt));
+                ScheduledFuture<?> retryFuture = scheduler.schedule(
+                        this::attempt, delay, TimeUnit.MILLISECONDS);
+                if (task != null) {
+                    taskToCancellation.compute(task, (k, existing) -> {
+                        if (existing != null) {
+                            existing.cancel(false);
+                        }
+                        return retryFuture;
+                    });
                 }
             }
         }
-
-        scheduler.execute(new RetryAttempt()::attempt);
-
-        try {
-            return future.get(taskTimeoutMs, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOGGER.warning("Interrumpido durante la ejecución de la tarea, reintentos=%d".formatted(attempts.get()));
-            throw new TaskManagerException("Interrumpido durante la ejecución de la tarea", e);
-        } catch (TimeoutException e) {
-            future.cancel(true);
-            LOGGER.warning("Tarea excedió el tiempo de espera de %dms, reintentos=%d".formatted(taskTimeoutMs, attempts.get()));
-            throw new TaskManagerException("Tarea excedió el tiempo de espera", e);
-        } catch (ExecutionException e) {
-            throw new TaskManagerException("Error ejecutando la tarea tras %d intentos".formatted(attempts.get()), e.getCause());
-        }
     }
 
-    public Task<?> addDependentTasks(List<Step<?>> steps, T data, int priority, int autoCancelAfterMs, int maxRetries) {
-        return addDependentTasks(steps, data, priority, autoCancelAfterMs, maxRetries, RetryConfig.defaultConfig());
-    }
+    scheduler.execute(new RetryAttempt()::attempt);
 
-    public Task<?> addDependentTasks(List<Step<?>> steps, T data, int priority, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig) {
+    try {
+        return future.get(taskTimeoutMs, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        LOGGER.warning("Interrumpido durante la ejecución de la tarea, intentos=%d".formatted(attempts.get()));
+        throw new TaskManagerException("Interrumpido durante la ejecución de la tarea", e);
+    } catch (TimeoutException e) {
+        future.cancel(true);
+        LOGGER.warning("Tarea excedió el tiempo de espera de %dms, intentos=%d".formatted(taskTimeoutMs, attempts.get()));
+        throw new TaskManagerException("Tarea excedió el tiempo de espera", e);
+    } catch (ExecutionException e) {
+        throw new TaskManagerException("Error ejecutando la tarea tras %d intentos".formatted(attempts.get()), e.getCause());
+    }
+}
+
+    /**
+     * Adds a group of tasks with the specified execution mode.
+     *
+     * @param steps The list of steps to execute.
+     * @param data The associated data.
+     * @param priority The task priority.
+     * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+     * @param maxRetries The maximum number of retries.
+     * @param retryConfig The retry configuration.
+     * @param executionMode The execution mode (SEQUENTIAL_STRICT, SEQUENTIAL,
+     * PARALLEL, CUSTOM).
+     * @param dependencies The dependency map for CUSTOM mode.
+     * @return The last scheduled Task, or null if no tasks.
+     */
+    public Task<?> addTasks(
+            List<Step<?>> steps,
+            T data,
+            int priority,
+            int autoCancelAfterMs,
+            int maxRetries,
+            RetryConfig retryConfig,
+            TaskExecutionMode executionMode,
+            Map<Integer, Set<Integer>> dependencies
+    ) {
         if (steps == null || steps.isEmpty()) {
             throw new IllegalArgumentException("La lista de pasos no puede ser nula o vacía");
         }
         steps.forEach(step -> validateParameters(() -> step, autoCancelAfterMs, maxRetries, retryConfig));
+        if (executionMode == TaskExecutionMode.CUSTOM && (dependencies == null || dependencies.isEmpty())) {
+            throw new IllegalArgumentException("Se requiere un mapa de dependencias no vacío para el modo CUSTOM");
+        }
+        if (executionMode == TaskExecutionMode.CUSTOM) {
+            validateCustomDependencies(steps.size(), dependencies);
+        }
 
         closeLock.lock();
         try {
             if (isClosed) {
                 throw new TaskManagerException("TaskManager está cerrado", null);
             }
-            Task<?> previousTask = null;
-            Task<?> lastTask = null;
+
+            AtomicBoolean isGroupCancelled = executionMode == TaskExecutionMode.SEQUENTIAL_STRICT ? new AtomicBoolean(false) : null;
+            Set<Task<?>> groupTasks = executionMode == TaskExecutionMode.SEQUENTIAL_STRICT ? ConcurrentHashMap.newKeySet() : null;
+            List<Task<?>> taskList = new ArrayList<>();
+            Map<Integer, CompletableFuture<Object>> futures = new HashMap<>();
 
             for (int i = 0; i < steps.size(); i++) {
                 Step<?> step = steps.get(i);
-                boolean isLast = i == steps.size() - 1;
-                Supplier<?> supplier = () -> {
-                    try {
-                        return step.execute();
-                    } catch (Throwable t) {
-                        throw new TaskManagerException("Error ejecutando paso en tarea dependiente: " + data, t);
-                    }
-                };
-                Set<Task<?>> dependsOn = previousTask != null ? Set.of(previousTask) : null;
-                Task<?> task = scheduleTask(supplier, data, priority, dependsOn, autoCancelAfterMs, maxRetries, retryConfig); // Aplica autoCancel a todas
-                lastTask = task;
-                LOGGER.fine("Tarea dependiente configurada: tarea=%s, data=%s, dependsOn=%s".formatted(task, data, dependsOn));
-                previousTask = task;
+                boolean isLastStep = i == steps.size() - 1 && executionMode != TaskExecutionMode.PARALLEL;
+                final int stepIndex = i;
+
+                Set<Task<?>> taskDependencies = new HashSet<>();
+                CompletableFuture<Object> currentFuture;
+
+                switch (executionMode) {
+                    case SEQUENTIAL_STRICT:
+                    case SEQUENTIAL:
+                        if (i > 0) {
+                            taskDependencies.add(taskList.get(i - 1));
+                        }
+                        currentFuture = createFutureForStep(
+                                step, data, priority, maxRetries, retryConfig, taskDependencies, isGroupCancelled, stepIndex
+                        );
+                        break;
+
+                    case PARALLEL:
+                        currentFuture = createFutureForStep(
+                                step, data, priority, maxRetries, retryConfig, Set.of(), isGroupCancelled, stepIndex
+                        );
+                        break;
+
+                    case CUSTOM:
+                        Set<Integer> depIndices = dependencies.getOrDefault(i, Set.of());
+                        for (Integer depIndex : depIndices) {
+                            if (depIndex >= i || depIndex < 0 || depIndex >= steps.size()) {
+                                throw new IllegalArgumentException(
+                                        "Dependencia inválida para el paso %d: índice %d".formatted(i, depIndex)
+                                );
+                            }
+                            taskDependencies.add(taskList.get(depIndex));
+                        }
+                        currentFuture = createFutureForStep(
+                                step, data, priority, maxRetries, retryConfig, taskDependencies, isGroupCancelled, stepIndex
+                        );
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException("Modo de ejecución no soportado: " + executionMode);
+                }
+
+                Task<Object> task = new Task<>(
+                        currentFuture,
+                        t -> LOGGER.fine("Tarea %s %d iniciada: %s".formatted(executionMode, stepIndex, t)),
+                        isLastStep
+                );
+                taskList.add(task);
+                if (executionMode == TaskExecutionMode.SEQUENTIAL_STRICT) {
+                    groupTasks.add(task);
+                }
+                futures.put(i, currentFuture);
+
+                TaskEntry<T> entry = new TaskEntry<>(task, data, priority, taskDependencies, autoCancelAfterMs > 0);
+                if (executionMode == TaskExecutionMode.SEQUENTIAL_STRICT) {
+                    entry.groupCancellationToken = isGroupCancelled;
+                }
+                taskData.putIfAbsent(task, entry);
+
+                addTask(task, data, priority, taskDependencies, autoCancelAfterMs > 0);
+                LOGGER.fine("Tarea añadida: tarea=%s, data=%s, modo=%s, step=%d, isLast=%b"
+                        .formatted(task, data, executionMode, stepIndex, isLastStep));
+
+                if (autoCancelAfterMs > 0) {
+                    ScheduledFuture<?> future = scheduler.schedule(
+                            () -> cancelTask(task, data, true), autoCancelAfterMs, TimeUnit.MILLISECONDS
+                    );
+                    scheduledCancellations.add(future);
+                    taskToCancellation.compute(task, (k, existing) -> {
+                        if (existing != null) {
+                            existing.cancel(false);
+                        }
+                        return future;
+                    });
+                }
+
+                if (executionMode == TaskExecutionMode.SEQUENTIAL_STRICT) {
+                    task.getFuture().whenComplete((result, ex) -> {
+                        if (task.isCancelled() || (ex != null && ex.getCause() instanceof CancellationException)) {
+                            isGroupCancelled.set(true);
+                            groupTasks.forEach(t -> {
+                                if (!t.isDone() && !t.isCancelled()) {
+                                    t.cancel(true);
+                                    LOGGER.fine("Tarea cancelada en grupo SEQUENTIAL_STRICT: tarea=%s".formatted(t));
+                                }
+                            });
+                        } else if (ex != null) {
+                            isGroupCancelled.set(true);
+                            groupTasks.forEach(t -> {
+                                if (!t.isDone() && !t.isCancelled()) {
+                                    t.cancel(true);
+                                    LOGGER.fine("Tarea cancelada en grupo SEQUENTIAL_STRICT por excepción: tarea=%s, excepción=%s".formatted(t, ex.getMessage()));
+                                }
+                            });
+                        }
+                    });
+                }
             }
 
-            LOGGER.info("Programadas %d tareas dependientes: data=%s, priority=%d".formatted(steps.size(), data, priority));
-            return lastTask;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error programando tareas dependientes: data=%s".formatted(data), e);
-            throw new TaskManagerException("Error programando tareas dependientes", e);
+            LOGGER.info("Programadas %d tareas en modo %s: data=%s, priority=%d"
+                    .formatted(steps.size(), executionMode, data, priority));
+            return taskList.isEmpty() ? null : taskList.get(taskList.size() - 1);
         } finally {
             closeLock.unlock();
         }
     }
 
+    /**
+     * Creates a CompletableFuture for a step, considering dependencies and
+     * cancellation.
+     *
+     * @param step The step to execute.
+     * @param data The associated data.
+     * @param priority The task priority.
+     * @param maxRetries The maximum number of retries.
+     * @param retryConfig The retry configuration.
+     * @param dependencies The task dependencies.
+     * @param isGroupCancelled The cancellation token for SEQUENTIAL_STRICT
+     * mode.
+     * @param stepIndex The index of the step.
+     * @return A CompletableFuture for the step.
+     */
+    private CompletableFuture<Object> createFutureForStep(
+            Step<?> step,
+            T data,
+            int priority,
+            int maxRetries,
+            RetryConfig retryConfig,
+            Set<Task<?>> dependencies,
+            AtomicBoolean isGroupCancelled,
+            int stepIndex
+    ) {
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        if (!dependencies.isEmpty()) {
+            CompletableFuture<Void> allDependencies = CompletableFuture.allOf(
+                    dependencies.stream().map(Task::getFuture).toArray(CompletableFuture[]::new)
+            );
+            allDependencies.thenRunAsync(() -> {
+                if (isGroupCancelled != null && isGroupCancelled.get() || Thread.currentThread().isInterrupted()) {
+                    future.completeExceptionally(
+                            new TaskManagerException("Tarea cancelada antes de ejecutarse: data=" + data, null)
+                    );
+                    return;
+                }
+                executeStepWithRetries(step, data, maxRetries, retryConfig, future, isGroupCancelled, stepIndex);
+            }, taskExecutor);
+        } else {
+            executeStepWithRetries(step, data, maxRetries, retryConfig, future, isGroupCancelled, stepIndex);
+        }
+        return future;
+    }
+
+    /**
+     * Executes a step with retries and completes the corresponding
+     * CompletableFuture.
+     *
+     * @param step The step to execute.
+     * @param data The associated data.
+     * @param maxRetries The maximum number of retries.
+     * @param retryConfig The retry configuration.
+     * @param future The CompletableFuture to complete.
+     * @param isGroupCancelled The cancellation token for SEQUENTIAL_STRICT
+     * mode.
+     * @param stepIndex The index of the step.
+     */
+    private void executeStepWithRetries(
+            Step<?> step,
+            T data,
+            int maxRetries,
+            RetryConfig retryConfig,
+            CompletableFuture<Object> future,
+            AtomicBoolean isGroupCancelled,
+            int stepIndex
+    ) {
+        taskExecutor.execute(() -> {
+            try {
+                Object result = executeWithRetries(() -> {
+                    if (isGroupCancelled != null && isGroupCancelled.get()) {
+                        throw new TaskManagerException("Tarea cancelada antes de ejecutarse: data=" + data, null);
+                    }
+                    try {
+                        return step.execute();
+                    } catch (Exception ex) {
+                        throw new TaskManagerException("Error ejecutando paso %d: data=%s".formatted(stepIndex, data), ex);
+                    }
+                }, null, maxRetries, retryConfig);
+                future.complete(result);
+            } catch (TaskManagerException e) {
+                future.completeExceptionally(e);
+            } catch (Exception e) {
+                future.completeExceptionally(new TaskManagerException(
+                        "Error ejecutando paso %d en tarea: data=%s".formatted(stepIndex, data), e
+                ));
+            }
+        });
+    }
+
+     /**
+     * Validates custom dependencies for CUSTOM execution mode.
+     *
+     * @param stepCount The number of steps.
+     * @param dependencies The dependency map.
+     * @throws IllegalArgumentException If dependencies are invalid or cyclic.
+     */
+    private void validateCustomDependencies(int stepCount, Map<Integer, Set<Integer>> dependencies) {
+        for (Map.Entry<Integer, Set<Integer>> entry : dependencies.entrySet()) {
+            int stepIndex = entry.getKey();
+            if (stepIndex < 0 || stepIndex >= stepCount) {
+                throw new IllegalArgumentException("Índice de paso inválido: " + stepIndex);
+            }
+            for (Integer depIndex : entry.getValue()) {
+                if (depIndex < 0 || depIndex >= stepCount) {
+                    throw new IllegalArgumentException("Índice de dependencia inválido: " + depIndex);
+                }
+                if (depIndex >= stepIndex) {
+                    throw new IllegalArgumentException(
+                            "Las dependencias deben ser pasos anteriores: paso=%d, dependencia=%d".formatted(stepIndex, depIndex)
+                    );
+                }
+            }
+        }
+        Set<Integer> visited = new HashSet<>();
+        Set<Integer> path = new HashSet<>();
+        for (int i = 0; i < stepCount; i++) {
+            if (!visited.contains(i)) {
+                if (hasCycle(i, dependencies, visited, path)) {
+                    throw new IllegalArgumentException("Dependencia circular detectada en el paso: " + i);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks for cycles in custom dependencies.
+     *
+     * @param step The current step index.
+     * @param dependencies The dependency map.
+     * @param visited The set of visited steps.
+     * @param path The current path in the dependency graph.
+     * @return True if a cycle is detected, false otherwise.
+     */
+    private boolean hasCycle(int step, Map<Integer, Set<Integer>> dependencies, Set<Integer> visited, Set<Integer> path) {
+        if (path.contains(step)) {
+            return true;
+        }
+        if (visited.contains(step)) {
+            return false;
+        }
+        visited.add(step);
+        path.add(step);
+        Set<Integer> deps = dependencies.getOrDefault(step, Set.of());
+        for (Integer dep : deps) {
+            if (hasCycle(dep, dependencies, visited, path)) {
+                return true;
+            }
+        }
+        path.remove(step);
+        return false;
+    }
+
+    /**
+ * Adds a group of sequential tasks with strict cancellation.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * List<Step<?>> steps = List.of(() -> "Step 1", () -> "Step 2");
+ * Task<?> lastTask = taskManager.addSequentialTasksWithStrict(
+ *     steps, "SequentialTask", 2, 5000, 2, RetryConfig.defaultConfig()
+ * );
+ * System.out.println(lastTask.isLastTaskInPipeline()); // Prints true
+ * ```
+ *
+ * @param steps The list of steps to execute.
+ * @param data The associated data.
+ * @param priority The task priority.
+ * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+ * @param maxRetries The maximum number of retries.
+ * @param retryConfig The retry configuration.
+ * @return The last scheduled Task.
+ */
+    public Task<?> addSequentialTasksWithStrict(
+            List<Step<?>> steps, T data, int priority, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig
+    ) {
+        return addTasks(steps, data, priority, autoCancelAfterMs, maxRetries, retryConfig, TaskExecutionMode.SEQUENTIAL_STRICT, null);
+    }
+  /**
+ * Adds a group of tasks with the specified execution mode.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * List<Step<?>> steps = List.of(() -> "Step 1", () -> "Step 2");
+ * Task<?> lastTask = taskManager.addTasks(
+ *     steps, "TaskGroup", 1, 5000, 2, RetryConfig.defaultConfig(), TaskExecutionMode.PARALLEL, null
+ * );
+ * System.out.println(lastTask != null); // Prints true
+ * ```
+ *
+ * @param steps The list of steps to execute.
+ * @param data The associated data.
+ * @param priority The task priority.
+ * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+ * @param maxRetries The maximum number of retries.
+ * @param retryConfig The retry configuration.
+ * @param executionMode The execution mode (SEQUENTIAL_STRICT, SEQUENTIAL, PARALLEL, CUSTOM).
+ * @param dependencies The dependency map for CUSTOM mode.
+ * @return The last scheduled Task, or null if no tasks.
+ */
     public void addTask(Task<?> task, T data, int priority, Set<Task<?>> dependsOn, boolean hasAutoCancel) {
         if (task == null) {
             throw new IllegalArgumentException("La tarea no puede ser nula");
@@ -355,7 +785,6 @@ public class TaskManager<T> {
             }
             checkCircularDependencies(task, dependsOn);
 
-            // Nueva verificación: No añadir tarea si alguna dependencia está cancelada
             if (dependsOn != null && dependsOn.stream()
                     .map(taskData::get)
                     .filter(Objects::nonNull)
@@ -402,7 +831,14 @@ public class TaskManager<T> {
             writeLock.unlock();
         }
     }
-
+/**
+     * Processes task completion, updating metrics and handling dependents.
+     *
+     * @param task The task that completed.
+     * @param entry The task entry.
+     * @param result The task result.
+     * @param ex The exception, if any.
+     */
     private void processTaskCompletion(Task<?> task, TaskEntry<T> entry, Object result, Throwable ex) {
         writeLock.lock();
         try {
@@ -420,13 +856,11 @@ public class TaskManager<T> {
                 processTask(entry, true, false, null, entry.hasAutoCancel);
                 cancelledTasksCount.incrementAndGet();
                 tasks.remove(entry);
-                // Cancelar dependientes
                 cancelDependents(task, entry.hasAutoCancel);
             } else if (isFailed) {
                 Exception exception = ex.getCause() instanceof Exception ? (Exception) ex.getCause() : new TaskException("Error en tarea", ex);
                 processTask(entry, false, true, exception, false);
                 failedTasksCount.incrementAndGet();
-                // Cancelar dependientes si la tarea falló
                 cancelDependents(task, false);
             } else {
                 processTask(entry, false, false, null, false);
@@ -439,7 +873,6 @@ public class TaskManager<T> {
             writeLock.unlock();
         }
 
-        // Procesar dependientes solo si la tarea se completó exitosamente
         if (!isClosed && !entry.isCancelled && !task.isCancelled() && ex == null) {
             Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
             if (!dependents.isEmpty()) {
@@ -448,7 +881,12 @@ public class TaskManager<T> {
             }
         }
     }
-
+    /**
+     * Cancels dependent tasks.
+     *
+     * @param task The task whose dependents should be cancelled.
+     * @param isAutoCancel Whether the cancellation is automatic.
+     */
     private void cancelDependents(Task<?> task, boolean isAutoCancel) {
         Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
         for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
@@ -458,7 +896,11 @@ public class TaskManager<T> {
             }
         }
     }
-
+    /**
+     * Processes dependent tasks that are ready to execute.
+     *
+     * @param dependents The dependent tasks to process.
+     */
     private void processDependents(Set<TaskEntry<T>> dependents) {
         List<TaskEntry<T>> readyDependents = new ArrayList<>();
 
@@ -469,7 +911,6 @@ public class TaskManager<T> {
                     LOGGER.fine("Omitiendo dependiente: tarea=%s, razon=procesado o cancelado.".formatted(dependent.task));
                     continue;
                 }
-                // Verificar si alguna dependencia está cancelada o fallida
                 boolean hasInvalidDependency = dependent.dependsOn.stream()
                         .map(taskData::get)
                         .filter(Objects::nonNull)
@@ -497,7 +938,6 @@ public class TaskManager<T> {
                         if (dependent.isProcessed || dependent.isCancelled || dependent.task.isCancelled()) {
                             continue;
                         }
-                        // Verificación adicional antes de ejecutar
                         boolean hasInvalidDependency = dependent.dependsOn.stream()
                                 .map(taskData::get)
                                 .filter(Objects::nonNull)
@@ -531,7 +971,12 @@ public class TaskManager<T> {
             });
         }
     }
-
+    /**
+     * Checks if all dependencies of a task are completed.
+     *
+     * @param entry The task entry.
+     * @return True if all dependencies are completed, false otherwise.
+     */
     private boolean areDependenciesCompleted(TaskEntry<T> entry) {
         if (entry.dependsOn.isEmpty()) {
             LOGGER.fine("No hay dependencias para la tarea %s, datos=%s".formatted(entry.task, entry.data));
@@ -543,7 +988,6 @@ public class TaskManager<T> {
                 LOGGER.warning("Dependencia no encontrada en taskData: dep=%s, tarea=%s".formatted(dep, entry.task));
                 return false;
             }
-            // Requerir que la tarea esté completada Y procesada
             if (!depEntry.task.isDone() || !depEntry.isProcessed || depEntry.isCancelled || depEntry.isFailed) {
                 LOGGER.fine("Dependencia no completada: dep=%s, isDone=%b, isProcessed=%b, isCancelled=%b, isFailed=%b, tarea=%s"
                         .formatted(dep, depEntry.task.isDone(), depEntry.isProcessed, depEntry.isCancelled, depEntry.isFailed, entry.task));
@@ -553,12 +997,17 @@ public class TaskManager<T> {
         LOGGER.fine("Todas las dependencias completadas para la tarea %s".formatted(entry.task));
         return true;
     }
-
+ /**
+     * Cleans up task-related resources.
+     *
+     * @param task The task to clean up.
+     * @param entry The task entry.
+     */
     private void cleanupTask(Task<?> task, TaskEntry<T> entry) {
         writeLock.lock();
         try {
             LOGGER.info("Limpiando tarea=%s, datos=%s".formatted(task, entry.data));
-            tasks.remove(entry); // Asegurarse de eliminar la tarea de tasks
+            tasks.remove(entry);
             taskData.remove(task);
             taskStartTimes.remove(task);
             dependentTasks.remove(task);
@@ -571,7 +1020,22 @@ public class TaskManager<T> {
             writeLock.unlock();
         }
     }
-
+ /**
+ * Cancels a specific task.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * Task<String> task = taskManager.scheduleTask(() -> "Task result", "TaskData", 1, null, 5000, 2);
+ * boolean cancelled = taskManager.cancelTask(task, "TaskData", true);
+ * System.out.println(cancelled); // Prints true if task was cancelled
+ * ```
+ *
+ * @param task The task to cancel.
+ * @param dataForCallback The data for the callback.
+ * @param isAutoCancel Whether the cancellation is automatic.
+ * @return True if the task was cancelled, false otherwise.
+ */
     public boolean cancelTask(Task<?> task, T dataForCallback, boolean isAutoCancel) {
         writeLock.lock();
         try {
@@ -592,7 +1056,6 @@ public class TaskManager<T> {
             tasks.remove(entry);
             processTask(entry, dataForCallback, true, false, null, isAutoCancel);
 
-            // Cancelar dependientes
             Set<TaskEntry<T>> dependents = dependentTasks.getOrDefault(task, Collections.emptySet());
             for (TaskEntry<T> dep : new ArrayList<>(dependents)) {
                 if (!dep.isProcessed && !dep.isCancelled) {
@@ -610,11 +1073,39 @@ public class TaskManager<T> {
             writeLock.unlock();
         }
     }
-
+ /**
+ * Cancels a specific task.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * Task<String> task = taskManager.scheduleTask(() -> "Task result", "TaskData", 1, null, 5000, 2);
+ * boolean cancelled = taskManager.cancelTask(task, "TaskData", true);
+ * System.out.println(cancelled); // Prints true if task was cancelled
+ * ```
+ *
+ * @param task The task to cancel.
+ * @param dataForCallback The data for the callback.
+ * @param isAutoCancel Whether the cancellation is automatic.
+ * @return True if the task was cancelled, false otherwise.
+ */
     public boolean cancelTask(Task<?> task, T dataForCallback) {
         return cancelTask(task, dataForCallback, false);
     }
-
+  /**
+ * Cancels all tasks associated with specific data.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * taskManager.scheduleTask(() -> "Task result", "TaskData", 1, null, 5000, 2);
+ * taskManager.cancelTasksForData("TaskData", true);
+ * System.out.println(taskManager.getActiveTaskCount()); // Prints 0 if all tasks were cancelled
+ * ```
+ *
+ * @param data The data associated with tasks to cancel.
+ * @param isAutoCancel Whether the cancellation is automatic.
+ */
     public void cancelTasksForData(T data, boolean isAutoCancel) {
         writeLock.lock();
         try {
@@ -624,18 +1115,24 @@ public class TaskManager<T> {
                     .collect(Collectors.toList());
             for (TaskEntry<T> entry : tasksToCancel) {
                 if (entry.groupCancellationToken != null) {
-                    entry.groupCancellationToken.set(true); // Marcar el grupo como cancelado
+                    entry.groupCancellationToken.set(true);
                 }
                 cancelTask(entry.task, entry.data, isAutoCancel);
                 if (entry.task.getFuture() != null) {
-                    entry.task.getFuture().cancel(true); // Forzar interrupción
+                    entry.task.getFuture().cancel(true);
                 }
             }
         } finally {
             writeLock.unlock();
         }
     }
-
+ /**
+     * Checks for circular dependencies in the task graph.
+     *
+     * @param task The task to check.
+     * @param dependsOn The tasks it depends on.
+     * @throws IllegalArgumentException If a circular dependency is detected.
+     */
     private void checkCircularDependencies(Task<?> task, Set<Task<?>> dependsOn) {
         if (dependsOn == null || dependsOn.isEmpty()) {
             return;
@@ -657,25 +1154,28 @@ public class TaskManager<T> {
             path.remove(current);
         }
     }
-
+  /**
+     * Processes a task's completion status and invokes the callback.
+     *
+     * @param entry The task entry.
+     * @param isCancelled Whether the task was cancelled.
+     * @param isFailed Whether the task failed.
+     * @param exception The exception, if any.
+     * @param isAutoCancel Whether the cancellation is automatic.
+     */
     private void processTask(TaskEntry<T> entry, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
-        processTask(entry, entry.data, isCancelled, isFailed, exception, isAutoCancel); // Usar entry.data por defecto
+        processTask(entry, entry.data, isCancelled, isFailed, exception, isAutoCancel);
     }
-
-//    private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
-//        if (onTaskComplete != null && callbackData != null) {
-//            callbackExecutor.submit(() -> {
-//                try {
-//                    boolean isLastTaskInPipeline = dependentTasks.getOrDefault(entry.task, Collections.emptySet()).isEmpty();
-//                    LOGGER.fine("Ejecutando callback: data=%s, isCancelled=%b, isFailed=%b, isAutoCancel=%b, isLastTaskInPipeline=%b"
-//                            .formatted(callbackData, isCancelled, isFailed, isAutoCancel, isLastTaskInPipeline));
-//                    onTaskComplete.accept(new TaskStatus<>(callbackData, isCancelled, isFailed, exception, isAutoCancel, isLastTaskInPipeline));
-//                } catch (Exception e) {
-//                    LOGGER.log(Level.SEVERE, "Error en callback para la tarea con datos: " + callbackData, e);
-//                }
-//            });
-//        }
-//    }
+ /**
+     * Processes a task with specific callback data.
+     *
+     * @param entry The task entry.
+     * @param callbackData The data for the callback.
+     * @param isCancelled Whether the task was cancelled.
+     * @param isFailed Whether the task failed.
+     * @param exception The exception, if any.
+     * @param isAutoCancel Whether the cancellation is automatic.
+     */
     private void processTask(TaskEntry<T> entry, T callbackData, boolean isCancelled, boolean isFailed, Exception exception, boolean isAutoCancel) {
         if (onTaskComplete != null && callbackData != null) {
             LOGGER.fine("Enviando callback para tarea: %s, data=%s, isLastTaskInPipeline=%b".formatted(entry.task, callbackData, entry.task.isLastTaskInPipeline()));
@@ -697,66 +1197,134 @@ public class TaskManager<T> {
             LOGGER.fine("Callback no enviado: onTaskComplete=%s, callbackData=%s".formatted(onTaskComplete, callbackData));
         }
     }
-
-    public void awaitAll() throws InterruptedException {
-        writeLock.lock();
-        try {
-            if (isClosed) {
-                return;
-            }
-        } finally {
-            writeLock.unlock();
+  /**
+ * Waits for all tasks to complete.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * taskManager.scheduleTask(() -> "Task result", "TaskData", 1, null, 5000, 2);
+ * try {
+ *     taskManager.awaitAll();
+ *     System.out.println(taskManager.getActiveTaskCount()); // Prints 0
+ * } catch (InterruptedException e) {
+ *     e.printStackTrace();
+ * }
+ * ```
+ *
+ * @throws InterruptedException If the thread is interrupted.
+ */
+public void awaitAll() throws InterruptedException {
+    writeLock.lock();
+    try {
+        if (isClosed) {
+            LOGGER.info("TaskManager ya está cerrado, omitiendo awaitAll");
+            return;
         }
-
-        LOGGER.info("Iniciando awaitAll, tareas activas=%d, métricas=%s".formatted(tasks.size(), getMetrics()));
-        CompletableFuture<Void> allTasks = CompletableFuture.allOf(
-                tasks.stream().map(entry -> entry.task.future).toArray(CompletableFuture[]::new)
-        );
-        try {
-            allTasks.get(AWAIT_ALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            // Esperar a que todas las tareas estén procesadas
-            while (!tasks.isEmpty()) {
-                Thread.sleep(100); // Breve espera para permitir procesamiento
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw e;
-        } catch (Exception ex) {
-            LOGGER.warning("Error esperando tareas: %s. Tareas afectadas: %s"
-                    .formatted(ex.getMessage(), tasks.stream().map(entry -> entry.data).toList()));
-        }
-
-        writeLock.lock();
-        try {
-            callbackExecutor.shutdown();
-            if (!callbackExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                LOGGER.warning("Callbacks no terminaron en 5 segundos, forzando cierre");
-                callbackExecutor.shutdownNow();
-                if (!callbackExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
-                    LOGGER.severe("No se pudo cerrar completamente el callbackExecutor");
-                }
-            }
-            callbackExecutor = Executors.newFixedThreadPool(DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE,
-                    new NamedThreadFactory("TaskManager-Callback"));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOGGER.warning("Interrumpido mientras se esperaba callbacks, restaurando estado");
-            throw e;
-        } finally {
-            writeLock.unlock();
-        }
-
-        LOGGER.info("Finalizado awaitAll, tareas activas=%d, métricas=%s".formatted(tasks.size(), getMetrics()));
+    } finally {
+        writeLock.unlock();
     }
 
+    LOGGER.info("Iniciando awaitAll, tareas activas=%d, métricas=%s".formatted(tasks.size(), getMetrics()));
+    CompletableFuture<Void> allTasks = CompletableFuture.allOf(
+            tasks.stream().map(entry -> entry.task.future).toArray(CompletableFuture[]::new)
+    );
+
+    try {
+        // Wait for all task futures to complete
+        allTasks.get(AWAIT_ALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        LOGGER.warning("Interrumpido mientras se esperaba la finalización de tareas");
+        throw e;
+    } catch (Exception ex) {
+        LOGGER.warning("Error esperando tareas: %s. Tareas afectadas: %s"
+                .formatted(ex.getMessage(), tasks.stream().map(entry -> entry.data).toList()));
+    }
+
+    // Wait for tasks to be cleaned up (tasks.isEmpty())
+    int maxWaitCycles = 50; // Up to 5 seconds
+    while (!tasks.isEmpty() && maxWaitCycles-- > 0) {
+        Thread.sleep(100);
+        LOGGER.fine("Esperando limpieza de tareas, activas=%d".formatted(tasks.size()));
+    }
+    if (!tasks.isEmpty()) {
+        LOGGER.warning("Tareas aún activas después de awaitAll: %d".formatted(tasks.size()));
+    }
+
+    // Flush and wait for taskExecutor to process all completions
+    writeLock.lock();
+    try {
+        // Submit an empty task to ensure all task completions are processed
+        CompletableFuture<Void> flushTaskExecutor = CompletableFuture.runAsync(() -> {}, taskExecutor);
+        flushTaskExecutor.get(5, TimeUnit.SECONDS);
+
+        // Attempt to shut down taskExecutor
+        taskExecutor.shutdown();
+        if (!taskExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+            LOGGER.warning("taskExecutor no terminó en 5 segundos, forzando cierre");
+            taskExecutor.shutdownNow();
+            if (!taskExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+                LOGGER.severe("No se pudo cerrar completamente el taskExecutor");
+            }
+        }
+
+        // Submit an empty task to ensure all callbacks are processed
+        CompletableFuture<Void> flushCallbackExecutor = CompletableFuture.runAsync(() -> {}, callbackExecutor);
+        flushCallbackExecutor.get(5, TimeUnit.SECONDS);
+
+        // Attempt to shut down callbackExecutor
+        callbackExecutor.shutdown();
+        if (!callbackExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+            LOGGER.warning("Callbacks no terminaron en 5 segundos, forzando cierre");
+            callbackExecutor.shutdownNow();
+            if (!callbackExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+                LOGGER.severe("No se pudo cerrar completamente el callbackExecutor");
+            }
+        }
+
+        // Recreate callbackExecutor for subsequent calls
+        callbackExecutor = Executors.newFixedThreadPool(DEFAULT_CALLBACK_EXECUTOR_POOL_SIZE,
+                new NamedThreadFactory("TaskManager-Callback"));
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        LOGGER.warning("Interrumpido mientras se esperaba executors, restaurando estado");
+        throw e;
+    } catch (Exception e) {
+        LOGGER.warning("Error esperando executors: %s".formatted(e.getMessage()));
+    } finally {
+        writeLock.unlock();
+    }
+
+    LOGGER.info("Finalizado awaitAll, tareas activas=%d, métricas=%s".formatted(tasks.size(), getMetrics()));
+}
+  /**
+     * Checks if there are any active tasks.
+     *
+     * @return True if there are active tasks, false otherwise.
+     */
     public boolean hasTasks() {
         return !tasks.isEmpty();
     }
-
+/**
+     * Returns the number of active tasks.
+     *
+     * @return The number of active tasks.
+     */
     public int getActiveTaskCount() {
         return tasks.size();
     }
-
+ /**
+ * Closes the TaskManager and cancels all tasks.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * taskManager.scheduleTask(() -> "Task result", "TaskData", 1, null, 5000, 2);
+ * taskManager.close();
+ * System.out.println(taskManager.getActiveTaskCount()); // Prints 0
+ * ```
+ */
     public void close() {
         closeLock.lock();
         try {
@@ -786,7 +1354,9 @@ public class TaskManager<T> {
             closeLock.unlock();
         }
     }
-
+/**
+     * Shuts down all executors gracefully.
+     */
     private void shutdownExecutors() {
         writeLock.lock();
         try {
@@ -854,7 +1424,20 @@ public class TaskManager<T> {
             }
         }
     }
-
+   /**
+ * Creates a TaskBuilder for a task action.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * TaskBuilder<String, Void> builder = taskManager.newTask(() -> System.out.println("Executing task"));
+ * Task<Void> task = builder.withData("TaskData").withPriority(1).build();
+ * System.out.println(task.isDone()); // Prints false initially
+ * ```
+ *
+ * @param action The task action.
+ * @return A TaskBuilder instance.
+ */
     public TaskBuilder<T, Void> newTask(TaskAction action) {
         Objects.requireNonNull(action, "Action cannot be null");
         return newTask(() -> {
@@ -866,13 +1449,44 @@ public class TaskManager<T> {
             return null;
         });
     }
-
+/**
+ * Creates a TaskBuilder for a supplier action.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * TaskBuilder<String, String> builder = taskManager.newTask(() -> "Task result");
+ * Task<String> task = builder.withData("TaskData").withPriority(1).build();
+ * System.out.println(task.isDone()); // Prints false initially
+ * ```
+ *
+ * @param action The supplier action.
+ * @return A TaskBuilder instance.
+ */
     public <R> TaskBuilder<T, R> newTask(Supplier<R> action) {
         return new TaskBuilder<>(this, action);
     }
-
-    public <R1, R2> void addChainedTasks(Supplier<R1> firstAction, Supplier<R2> secondAction, T data, int priority, int autoCancelSecondAfterMs) {
-        addChainedTasks(firstAction, secondAction, data, priority, autoCancelSecondAfterMs, RetryConfig.defaultConfig());
+ /**
+ * Adds two chained tasks with custom retry configuration.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * taskManager.addChainedTasks(
+ *     () -> "First task", () -> "Second task", "ChainData", 1, 5000, RetryConfig.defaultConfig()
+ * );
+ * System.out.println(taskManager.getActiveTaskCount()); // Prints 2 initially
+ * ```
+ *
+ * @param firstAction The first task action.
+ * @param secondAction The second task action.
+ * @param data The associated data.
+ * @param priority The task priority.
+ * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+ * @param retryConfig The retry configuration.
+ */
+    public <R1, R2> void addChainedTasks(Supplier<R1> firstAction, Supplier<R2> secondAction, T data, int priority, int autoCancelAfterMs) {
+        addChainedTasks(firstAction, secondAction, data, priority, autoCancelAfterMs, RetryConfig.defaultConfig());
     }
 
     public Map<String, Long> getMetrics() {
@@ -884,7 +1498,16 @@ public class TaskManager<T> {
                 "activeTasks", (long) getActiveTaskCount()
         );
     }
-
+  /**
+     * Adds two chained tasks with custom retry configuration.
+     *
+     * @param firstAction The first task action.
+     * @param secondAction The second task action.
+     * @param data The associated data.
+     * @param priority The task priority.
+     * @param autoCancelAfterMs The auto-cancel timeout in milliseconds.
+     * @param retryConfig The retry configuration.
+     */
     public <R1, R2> void addChainedTasks(Supplier<R1> firstAction, Supplier<R2> secondAction, T data, int priority, int autoCancelAfterMs, RetryConfig retryConfig) {
         validateParameters(firstAction, autoCancelAfterMs, 0, retryConfig);
         validateParameters(secondAction, autoCancelAfterMs, 0, retryConfig);
@@ -900,7 +1523,15 @@ public class TaskManager<T> {
             closeLock.unlock();
         }
     }
-
+/**
+ * Validates the parameters of a task before scheduling it.
+ *
+ * @param action The task action to execute.
+ * @param autoCancelAfterMs The time in milliseconds after which the task is automatically canceled.
+ * @param maxRetries The maximum number of retries allowed for the task.
+ * @param retryConfig The retry configuration for the task.
+ * @throws IllegalArgumentException If any parameter is invalid.
+ */
     private void validateParameters(Supplier<?> action, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig) {
         if (action == null) {
             throw new IllegalArgumentException("La acción no puede ser nula");
@@ -915,7 +1546,20 @@ public class TaskManager<T> {
             throw new IllegalArgumentException("RetryConfig no puede ser nulo");
         }
     }
-
+/**
+ * Finds the first task matching the given predicate.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * Task<String> task = taskManager.scheduleTask(() -> "Task result", "TaskData", 1, null, 5000, 2);
+ * Task<?> foundTask = taskManager.findFirstTask(entry -> entry.data.equals("TaskData"));
+ * System.out.println(foundTask != null); // Prints true
+ * ```
+ *
+ * @param predicate The predicate to match tasks.
+ * @return The first matching task, or null if none found.
+ */
     public Task<?> findFirstTask(Predicate<TaskEntry<T>> predicate) {
         readLock.lock();
         try {
@@ -929,130 +1573,21 @@ public class TaskManager<T> {
         }
     }
 
-    /**
-     * Añade un grupo de tareas secuenciales con cancelación estricta. Si el
-     * dato asociado se cancela, todas las tareas del grupo se detienen
-     * inmediatamente.
-     *
-     * @param steps Lista de pasos a ejecutar en secuencia.
-     * @param data Datos asociados a las tareas.
-     * @param priority Prioridad de las tareas.
-     * @param autoCancelAfterMs Tiempo después del cual se cancelan
-     * automáticamente (0 para desactivar).
-     * @param maxRetries Número máximo de reintentos.
-     * @param retryConfig Configuración de reintentos.
-     * @return La última tarea programada.
-     */
-
-    public Task<?> addSequentialTasksWithStrict(
-            List<Step<?>> steps, T data, int priority, int autoCancelAfterMs, int maxRetries, RetryConfig retryConfig
-    ) {
-        if (steps == null || steps.isEmpty()) {
-            throw new IllegalArgumentException("La lista de pasos no puede ser nula o vacía");
-        }
-        steps.forEach(step -> validateParameters(() -> step, autoCancelAfterMs, maxRetries, retryConfig));
-
-        closeLock.lock();
-        try {
-            if (isClosed) {
-                throw new TaskManagerException("TaskManager está cerrado", null);
-            }
-
-            AtomicBoolean isGroupCancelled = new AtomicBoolean(false);
-            Set<Task<?>> groupTasks = ConcurrentHashMap.newKeySet();
-            Task<?> lastTask = null;
-            CompletableFuture<Object> previousFuture = CompletableFuture.completedFuture(null);
-
-            for (int i = 0; i < steps.size(); i++) {
-                Step<?> step = steps.get(i);
-                boolean isLastStep = i == steps.size() - 1;
-                final int stepIndex = i;
-
-                // Crear un CompletableFuture para la tarea actual que depende del anterior
-                CompletableFuture<Object> currentFuture = previousFuture.thenComposeAsync(v -> {
-                    if (isGroupCancelled.get() || Thread.currentThread().isInterrupted()) {
-                        return CompletableFuture.failedFuture(
-                                new TaskManagerException("Tarea cancelada antes de ejecutarse: data=" + data, null)
-                        );
-                    }
-                    Supplier<Object> wrappedStep = () -> {
-                        if (isGroupCancelled.get()) {
-                            throw new TaskManagerException("Tarea cancelada antes de ejecutarse: data=" + data, null);
-                        }
-                        try {
-                            return step.execute();
-                        } catch (Throwable t) {
-                            throw new TaskManagerException("Error ejecutando paso en tarea: " + data, t);
-                        }
-                    };
-                    return CompletableFuture.supplyAsync(
-                            () -> executeWithRetries(wrappedStep, null, maxRetries, retryConfig),
-                            taskExecutor
-                    );
-                }, taskExecutor);
-
-                // Crear la tarea usando el constructor correcto
-                Task<Object> task = new Task<>(
-                        currentFuture,
-                        t -> LOGGER.fine("Tarea secuencial %d iniciada: %s".formatted(stepIndex, t)),
-                        isLastStep
-                );
-                groupTasks.add(task);
-
-                // Configurar TaskEntry
-                TaskEntry<T> entry = new TaskEntry<>(task, data, priority, Set.of(), autoCancelAfterMs > 0);
-                entry.groupCancellationToken = isGroupCancelled;
-                taskData.putIfAbsent(task, entry);
-
-                // Añadir la tarea
-                addTask(task, data, priority, Set.of(), autoCancelAfterMs > 0);
-                LOGGER.fine("Tarea añadida: tarea=%s, data=%s, isLastTaskInPipeline=%b".formatted(task, data, isLastStep));
-
-                // Configurar cancelación automática si es necesario
-                if (autoCancelAfterMs > 0) {
-                    ScheduledFuture<?> future = scheduler.schedule(
-                            () -> cancelTask(task, data, true), autoCancelAfterMs, TimeUnit.MILLISECONDS
-                    );
-                    scheduledCancellations.add(future);
-                    taskToCancellation.compute(task, (k, existing) -> {
-                        if (existing != null) {
-                            existing.cancel(false);
-                        }
-                        return future;
-                    });
-                }
-
-                // Configurar cancelación del grupo si la tarea falla o se cancela
-                task.getFuture().whenComplete((result, ex) -> {
-                    if (task.isCancelled() || (ex != null && ex.getCause() instanceof CancellationException)) {
-                        isGroupCancelled.set(true);
-                        groupTasks.forEach(t -> {
-                            if (!t.isDone() && !t.isCancelled()) {
-                                t.cancel(true);
-                            }
-                        });
-                    } else if (ex != null) {
-                        isGroupCancelled.set(true);
-                        groupTasks.forEach(t -> {
-                            if (!t.isDone() && !t.isCancelled()) {
-                                t.cancel(true);
-                            }
-                        });
-                    }
-                });
-
-                lastTask = task;
-                previousFuture = currentFuture;
-                LOGGER.fine("Tarea secuencial configurada: tarea=%s, data=%s, step=%d, isLast=%b".formatted(task, data, i, isLastStep));
-            }
-
-            LOGGER.info("Programadas %d tareas secuenciales con cancelación estricta: data=%s, priority=%d".formatted(steps.size(), data, priority));
-            return lastTask;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error programando tareas secuenciales: data=%s".formatted(data), e);
-            throw new TaskManagerException("Error programando tareas secuenciales", e);
-        } finally {
-            closeLock.unlock();
-        }
+ /**
+ * Initiates the construction of a task pipeline for the specified data.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * PipelineBuilder<String> pipeline = taskManager.pipeline("PipelineData");
+ * System.out.println(pipeline != null); // Prints true
+ * ```
+ *
+ * @param data The data associated with the pipeline.
+ * @return A PipelineBuilder for defining steps and dependencies.
+ */
+    public PipelineBuilder<T> pipeline(T data) {
+        return new PipelineBuilder<>(data, this);
     }
+
 }

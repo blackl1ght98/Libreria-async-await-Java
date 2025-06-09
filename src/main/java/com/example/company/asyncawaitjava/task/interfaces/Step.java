@@ -4,28 +4,50 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /**
- * Representa un paso en una cadena de tareas, con un resultado de tipo R.
+ * Represents a step in a task chain, producing a result of type R.
+ * This interface defines a single step in a task pipeline, which can be executed synchronously or asynchronously.
  */
-
 public interface Step<R> {
     /**
-     * Ejecuta el paso y devuelve un resultado (o null para Void).
-     * @throws Exception si ocurre un error durante la ejecución.
+     * Executes the step and returns a result (or null for Void).
+     * 
+     * Example usage:
+     * ```java
+     * Step<String> step = Step.returning(() -> "Hello", String.class);
+     * String result = step.execute(); // Returns "Hello"
+     * ```
+     * 
+     * @return The result of the step execution.
+     * @throws Exception If an error occurs during execution.
      */
     R execute() throws Exception;
 
     /**
-     * Devuelve el tipo de retorno esperado.
-     * @return La clase del tipo de retorno.
+     * Returns the expected return type of the step.
+     * 
+     * Example usage:
+     * ```java
+     * Step<String> step = Step.returning(() -> "Hello", String.class);
+     * Class<String> type = step.getReturnType(); // Returns String.class
+     * ```
+     * 
+     * @return The class of the return type.
      */
     Class<R> getReturnType();
 
     /**
-     * Crea un paso que devuelve un valor usando un Supplier.
-     * @param supplier El proveedor del valor.
-     * @param returnType El tipo de retorno esperado.
-     * @param <R> El tipo de retorno.
-     * @return Un nuevo paso.
+     * Creates a step that returns a value using a Supplier.
+     * 
+     * Example usage:
+     * ```java
+     * Step<Integer> step = Step.returning(() -> 42, Integer.class);
+     * Integer result = step.execute(); // Returns 42
+     * ```
+     * 
+     * @param supplier The supplier providing the value.
+     * @param returnType The expected return type.
+     * @param <R> The return type.
+     * @return A new step.
      */
     static <R> Step<R> returning(Supplier<R> supplier, Class<R> returnType) {
         return new Step<>() {
@@ -42,16 +64,23 @@ public interface Step<R> {
     }
 
     /**
-     * Crea un paso que realiza una acción sin devolver valor (Void).
-     * @param runnable La acción a ejecutar.
-     * @return Un nuevo paso de tipo Void.
+     * Creates a step that performs an action without returning a value (Void).
+     * 
+     * Example usage:
+     * ```java
+     * Step<Void> step = Step.doing(() -> System.out.println("Action"));
+     * step.execute(); // Prints "Action" and returns null
+     * ```
+     * 
+     * @param runnable The action to execute.
+     * @return A new Void step.
      */
     static Step<Void> doing(Runnable runnable) {
         return new Step<>() {
             @Override
             public Void execute() throws Exception {
                 runnable.run();
-                return null; // Retorno implícito para Void
+                return null;
             }
 
             @Override
@@ -62,16 +91,29 @@ public interface Step<R> {
     }
 
     /**
-     * Crea un paso que ejecuta una acción con excepciones verificadas.
-     * @param checkedStep La acción a ejecutar.
-     * @return Un nuevo paso de tipo Void.
+     * Creates a step that executes an action with checked exceptions.
+     * 
+     * Example usage:
+     * ```java
+     * Step<Void> step = Step.executing(() -> {
+     *     throw new IOException("Test");
+     * });
+     * try {
+     *     step.execute(); // Throws IOException
+     * } catch (Exception e) {
+     *     System.out.println(e.getMessage()); // Prints "Test"
+     * }
+     * ```
+     * 
+     * @param checkedStep The action to execute.
+     * @return A new Void step.
      */
     static Step<Void> executing(CheckedStep checkedStep) {
         return new Step<>() {
             @Override
             public Void execute() throws Exception {
                 checkedStep.execute();
-                return null; // Retorno implícito para Void
+                return null;
             }
 
             @Override
@@ -80,19 +122,29 @@ public interface Step<R> {
             }
         };
     }
-    
+
     /**
-     * Crea un paso que ejecuta una tarea asíncrona representada por un CompletableFuture.
-     * @param futureSupplier El proveedor del CompletableFuture.
-     * @param returnType El tipo de retorno esperado.
-     * @param <T> El tipo de retorno.
-     * @return Un nuevo paso.
+     * Creates a step that executes an asynchronous task represented by a CompletableFuture.
+     * 
+     * Example usage:
+     * ```java
+     * Step<String> step = Step.fromFuture(
+     *     () -> CompletableFuture.supplyAsync(() -> "Async Result"),
+     *     String.class
+     * );
+     * String result = step.execute(); // Returns "Async Result"
+     * ```
+     * 
+     * @param futureSupplier The supplier of the CompletableFuture.
+     * @param returnType The expected return type.
+     * @param <T> The return type.
+     * @return A new step.
      */
     static <T> Step<T> fromFuture(Supplier<CompletableFuture<T>> futureSupplier, Class<T> returnType) {
         return new Step<>() {
             @Override
             public T execute() throws Exception {
-                return futureSupplier.get().join(); // Usamos join() para esperar el resultado
+                return futureSupplier.get().join();
             }
 
             @Override

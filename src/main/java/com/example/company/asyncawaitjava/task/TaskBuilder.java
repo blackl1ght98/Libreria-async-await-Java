@@ -1,4 +1,3 @@
-
 package com.example.company.asyncawaitjava.task;
 
 import com.example.company.asyncawaitjava.config.RetryConfig;
@@ -10,6 +9,14 @@ import java.util.function.Supplier;
 /**
  * A fluent builder for scheduling tasks in a TaskManager, allowing configuration of task properties
  * such as priority, dependencies, auto-cancellation, retries, and retry policies.
+ *
+ * Example usage:
+ * ```java
+ * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+ * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+ * Task<String> task = builder.withData("TaskData").withPriority(1).schedule();
+ * System.out.println(task.isDone()); // Prints false initially
+ * ```
  *
  * @param <T> The type of data associated with the task.
  * @param <R> The result type of the task.
@@ -27,6 +34,13 @@ public class TaskBuilder<T, R> {
     /**
      * Constructs a TaskBuilder for a given TaskManager and action.
      *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * System.out.println(builder != null); // Prints true
+     * ```
+     *
      * @param taskManager The TaskManager to schedule the task.
      * @param action      The action to execute.
      * @throws IllegalArgumentException If taskManager or action is null.
@@ -39,6 +53,15 @@ public class TaskBuilder<T, R> {
     /**
      * Sets the data associated with the task.
      *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * builder.withData("TaskData");
+     * Task<String> task = builder.schedule();
+     * System.out.println(task.isDone()); // Prints false initially
+     * ```
+     *
      * @param data The data to associate.
      * @return This builder.
      */
@@ -49,6 +72,15 @@ public class TaskBuilder<T, R> {
 
     /**
      * Sets the priority of the task (higher value means higher priority).
+     *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * builder.withPriority(2);
+     * Task<String> task = builder.schedule();
+     * System.out.println(task.isDone()); // Prints false initially
+     * ```
      *
      * @param priority The priority value.
      * @return This builder.
@@ -61,6 +93,15 @@ public class TaskBuilder<T, R> {
     /**
      * Sets the dependencies for the task.
      *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * Task<String> task1 = taskManager.scheduleTask(() -> "Task 1", "Data1", 1, null, 5000, 2);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task 2");
+     * builder.withDependencies(Set.of(task1));
+     * Task<String> task2 = builder.schedule();
+     * ```
+     *
      * @param dependsOn The set of tasks this task depends on.
      * @return This builder.
      */
@@ -71,6 +112,16 @@ public class TaskBuilder<T, R> {
 
     /**
      * Adds a single dependency for the task.
+     *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * Task<String> task1 = taskManager.scheduleTask(() -> "Task 1", "Data1", 1, null, 5000, 2);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task 2");
+     * builder.withDependency(task1);
+     * Task<String> task2 = builder.schedule();
+     * System.out.println(task2.isDone()); // Prints false initially
+     * ```
      *
      * @param dependency The task this task depends on.
      * @return This builder.
@@ -84,6 +135,15 @@ public class TaskBuilder<T, R> {
 
     /**
      * Sets the auto-cancellation timeout in milliseconds.
+     *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * builder.withAutoCancel(5000);
+     * Task<String> task = builder.schedule();
+     * System.out.println(task.isDone()); // Prints false initially
+     * ```
      *
      * @param autoCancelAfterMs The timeout after which the task is cancelled (0 to disable).
      * @return This builder.
@@ -100,6 +160,15 @@ public class TaskBuilder<T, R> {
     /**
      * Sets the maximum number of retries for the task.
      *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * builder.withRetries(3);
+     * Task<String> task = builder.schedule();
+     * System.out.println(task.isDone()); // Prints false initially
+     * ```
+     *
      * @param maxRetries The maximum number of retries.
      * @return This builder.
      * @throws IllegalArgumentException If maxRetries is negative.
@@ -115,6 +184,15 @@ public class TaskBuilder<T, R> {
     /**
      * Sets the retry configuration for the task.
      *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * builder.withRetryConfig(RetryConfig.defaultConfig());
+     * Task<String> task = builder.schedule();
+     * System.out.println(task.isDone()); // Prints false initially
+     * ```
+     *
      * @param retryConfig The retry configuration.
      * @return This builder.
      * @throws IllegalArgumentException If retryConfig is null.
@@ -126,6 +204,14 @@ public class TaskBuilder<T, R> {
 
     /**
      * Schedules the task with the configured properties.
+     *
+     * Example usage:
+     * ```java
+     * TaskManager<String> taskManager = TaskManager.of(System.out::println);
+     * TaskBuilder<String, String> builder = new TaskBuilder<>(taskManager, () -> "Task result");
+     * Task<String> task = builder.withData("TaskData").withPriority(1).withAutoCancel(5000).schedule();
+     * System.out.println(task.isDone()); // Prints false initially
+     * ```
      *
      * @return The scheduled Task.
      * @throws TaskManager.TaskManagerException If the TaskManager is closed or there are circular dependencies.

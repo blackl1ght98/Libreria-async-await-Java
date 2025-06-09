@@ -6,12 +6,15 @@ C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\core\AsyncProcessor.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\exceptions\customizedException.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\interfaces\CheckedStep.java
+C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\interfaces\StatusCallback.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\interfaces\Step.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\interfaces\TaskAction.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\NamedThreadFactory.java
+C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\PipelineBuilder.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\PriorityRunnable.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\Task.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\TaskBuilder.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\TaskEntry.java
+C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\TaskExecutionMode.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\TaskManager.java
 C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\src\main\java\com\example\company\asyncawaitjava\task\TaskStatus.java

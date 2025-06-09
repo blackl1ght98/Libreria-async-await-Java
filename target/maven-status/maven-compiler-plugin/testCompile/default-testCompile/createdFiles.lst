@@ -1,3 +1,4 @@
-com\example\company\asyncawaitjava\task\TestsDependentTasks.class
+com\example\company\asyncawaitjava\task\TaskManagerRetryTest.class
 com\example\company\asyncawaitjava\task\TestTask.class
+com\example\company\asyncawaitjava\task\RetryConfigTest.class
 com\example\company\asyncawaitjava\task\TaskManagerTest.class
