@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>cafeteria</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>24</maven.compiler.release>
+        <exec.mainClass>com.example.cafeteria.MainCafeteria</exec.mainClass>
+    </properties>
+    <dependencies>
+        <!-- Dependencia de asyncawaitjava -->
+        <dependency>
+            <groupId>com.example.company</groupId>
+            <artifactId>asyncawaitjava</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- Dependencias de JUnit 5 para pruebas -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <!-- Configurar maven-compiler-plugin para procesar anotaciones -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <release>24</release>
+                    <compilerArgs>
+                        <arg>--enable-preview</arg>
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <!-- No especificamos procesadores; confiamos en META-INF/services -->
+                        <path>
+                            <groupId>com.example.company</groupId>
+                            <artifactId>asyncawaitjava</artifactId>
+                            <version>1.0-SNAPSHOT</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+                </configuration>
+            </plugin>
+            <!-- Configurar maven-exec-plugin para ejecución -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>${exec.mainClass}</mainClass>
+                    <arguments>
+                        <argument>--enable-native-access=ALL-UNNAMED</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <!-- Configurar maven-surefire-plugin para pruebas -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.1</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

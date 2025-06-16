@@ -335,12 +335,12 @@ public class TaskManager<T> {
     final long maxTotalRetryTimeMs = 30_000;
     long startTime = System.currentTimeMillis();
 
-    // Usar maxAttempts de retryConfig si es mayor que maxRetries
+ 
     int effectiveMaxRetries = retryConfig != null && retryConfig.getMaxAttempts() > 0 ? retryConfig.getMaxAttempts() : maxRetries;
 
     class RetryAttempt {
         private void attempt() {
-            int currentAttempt = attempts.incrementAndGet(); // Incrementar al inicio
+            int currentAttempt = attempts.incrementAndGet(); 
             if (isClosed || (task != null && task.future.isCancelled())) {
                 future.completeExceptionally(new TaskManagerException("Tarea cancelada o TaskManager cerrado", null));
                 return;

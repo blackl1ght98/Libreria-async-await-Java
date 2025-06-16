@@ -9,9 +9,7 @@ import java.util.concurrent.ExecutorService;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 public @interface Async {
-    String methodSuffix() default "Async"; // Sufijo para el método generado
-    Class<? extends ExecutorService> executor() default DefaultExecutor.class; // Ejecutor personalizado
-
-    // Clase auxiliar para el ejecutor por defecto
+    String methodSuffix() default "Async"; 
+    Class<? extends ExecutorService> executor() default DefaultExecutor.class; 
     interface DefaultExecutor extends ExecutorService {}
 }
