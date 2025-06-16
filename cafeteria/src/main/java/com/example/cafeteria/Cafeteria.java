@@ -67,310 +67,311 @@ public class Cafeteria {
         }
     }
 
-   public void procesarColaPedidosLowLevel() {
-    taskManager = new TaskManager<>(status -> {
-        Pedido pedido = status.data;
-        if (pedido == null) {
-            LOGGER.warning("Estado recibido con pedido nulo");
-            return;
-        }
-        try {
-            int clienteId = pedido.getClienteId();
-            LOGGER.fine("Callback para clienteId=%d, isLastTaskInPipeline=%b, isCancelled=%b, isFailed=%b"
-                    .formatted(clienteId, status.isLastTaskInPipeline(), status.isCancelled(), status.isFailed()));
-
-            AtomicInteger tareasCompletadas = tareasCompletadasPorPedido.get(clienteId);
-            if (tareasCompletadas == null) {
-                LOGGER.warning("No se encontró contador de tareas para clienteId=%d".formatted(clienteId));
+    public void procesarColaPedidosLowLevel() {
+        taskManager = new TaskManager<>(status -> {
+            Pedido pedido = status.data;
+            if (pedido == null) {
+                LOGGER.warning("Estado recibido con pedido nulo");
                 return;
             }
+            try {
+                int clienteId = pedido.getClienteId();
+                LOGGER.fine("Callback para clienteId=%d, isLastTaskInPipeline=%b, isCancelled=%b, isFailed=%b"
+                        .formatted(clienteId, status.isLastTaskInPipeline(), status.isCancelled(), status.isFailed()));
 
-            if (status.isCancelled()) {
-                LOGGER.info("Pedido del Cliente " + clienteId + " fue cancelado.");
-                System.out.println(GREEN + "Pedido del Cliente " + clienteId + " fue cancelado. Estación liberada." + RESET);
-                liberarEstacion(pedido);
-                tareasCompletadasPorPedido.remove(clienteId);
-            } else if (status.isFailed()) {
-                LOGGER.log(Level.WARNING, "Error en el pedido del Cliente " + clienteId, status.exception);
-                System.out.println(GREEN + "Error en el pedido del Cliente " + clienteId + ": " + status.exception.getMessage() + ". Estación liberada." + RESET);
-                liberarEstacion(pedido);
-                tareasCompletadasPorPedido.remove(clienteId);
-            } else {
-                int tareas = tareasCompletadas.incrementAndGet();
-                LOGGER.fine("Tarea completada para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
-                if (tareas == TASKS_PER_ORDER) {
-                    LOGGER.info("Pedido del Cliente " + clienteId + " completado (todas las tareas finalizadas).");
-                    System.out.println(GREEN + "Pedido del Cliente " + clienteId + " completado. Estación liberada." + RESET);
-                    clientesAtendidos.incrementAndGet();
-                    ingresosTotales.addAndGet((int) (PRECIO_PEDIDO * 100));
+                AtomicInteger tareasCompletadas = tareasCompletadasPorPedido.get(clienteId);
+                if (tareasCompletadas == null) {
+                    LOGGER.warning("No se encontró contador de tareas para clienteId=%d".formatted(clienteId));
+                    return;
+                }
+
+                if (status.isCancelled()) {
+                    LOGGER.info("Pedido del Cliente " + clienteId + " fue cancelado.");
+                    System.out.println(GREEN + "Pedido del Cliente " + clienteId + " fue cancelado. Estación liberada." + RESET);
+                    liberarEstacion(pedido);
+                    tareasCompletadasPorPedido.remove(clienteId);
+                } else if (status.isFailed()) {
+                    LOGGER.log(Level.WARNING, "Error en el pedido del Cliente " + clienteId, status.exception);
+                    System.out.println(GREEN + "Error en el pedido del Cliente " + clienteId + ": " + status.exception.getMessage() + ". Estación liberada." + RESET);
                     liberarEstacion(pedido);
                     tareasCompletadasPorPedido.remove(clienteId);
                 } else {
-                    LOGGER.fine("Ignorando tarea intermedia para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
-                }
-            }
-
-            if (pedido.getLatch() != null && (status.isCancelled() || status.isFailed() || tareasCompletadas.get() == TASKS_PER_ORDER)) {
-                pedido.getLatch().countDown();
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error procesando el callback para el pedido del Cliente " + pedido.getClienteId(), e);
-        }
-    });
-
-    AsyncCafeteriaTasks asyncTasks = new AsyncCafeteriaTasks();
-    boolean interrupted = false;
-
-    while (aceptandoPedidos || !colaPedidos.isEmpty() || (taskManager != null && taskManager.getActiveTaskCount() > 0)) {
-        try {
-            if (estacionesDisponibles.availablePermits() > 0) {
-                Pedido pedido = colaPedidos.poll(100, TimeUnit.MILLISECONDS);
-                if (pedido == null) {
-                    Thread.sleep(10);
-                    continue;
-                }
-
-                int clienteId = pedido.getClienteId();
-                if (clienteId == 3) {
-                    LOGGER.info("Cancelando automáticamente el pedido del Cliente 3 encontrado en la cola.");
-                    System.out.println(GREEN + "Cancelando automáticamente el pedido del Cliente 3..." + RESET);
-                    tareasCompletadasPorPedido.remove(clienteId);
-                    if (pedido.getLatch() != null) {
-                        pedido.getLatch().countDown();
+                    int tareas = tareasCompletadas.incrementAndGet();
+                    LOGGER.fine("Tarea completada para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
+                    if (tareas == TASKS_PER_ORDER) {
+                        LOGGER.info("Pedido del Cliente " + clienteId + " completado (todas las tareas finalizadas).");
+                        System.out.println(GREEN + "Pedido del Cliente " + clienteId + " completado. Estación liberada." + RESET);
+                        clientesAtendidos.incrementAndGet();
+                        ingresosTotales.addAndGet((int) (PRECIO_PEDIDO * 100));
+                        liberarEstacion(pedido);
+                        tareasCompletadasPorPedido.remove(clienteId);
+                    } else {
+                        LOGGER.fine("Ignorando tarea intermedia para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
                     }
-                    System.out.println(GREEN + "Pedido del Cliente 3 cancelado (estaba en la cola)." + RESET);
-                    continue; // Saltar al siguiente pedido
                 }
 
-                estacionesDisponibles.acquire();
-                estacionesOcupadas.put(clienteId, true);
+                if (pedido.getLatch() != null && (status.isCancelled() || status.isFailed() || tareasCompletadas.get() == TASKS_PER_ORDER)) {
+                    pedido.getLatch().countDown();
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error procesando el callback para el pedido del Cliente " + pedido.getClienteId(), e);
+            }
+        });
 
-                List<Step<?>> steps = List.of(
-                    Step.fromFuture(() -> {
-                        try {
-                            return asyncTasks.prepararBebidaAsync(pedido);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return CompletableFuture.failedFuture(new RuntimeException("Error preparando bebida", e));
-                        }
-                    }, Void.class),
-                    Step.fromFuture(() -> {
-                        try {
-                            return asyncTasks.prepararAcompañamientoAsync(pedido);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return CompletableFuture.failedFuture(new RuntimeException("Error preparando acompañamiento", e));
-                        }
-                    }, Void.class),
-                    Step.fromFuture(() -> {
-                        try {
-                            return asyncTasks.entregarPedidoAsync(pedido);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return CompletableFuture.failedFuture(new RuntimeException("Error entregando pedido", e));
-                        }
-                    }, Void.class)
-                );
+        AsyncCafeteriaTasks asyncTasks = new AsyncCafeteriaTasks();
+        boolean interrupted = false;
 
-                taskManager.addSequentialTasksWithStrict(
-                    steps,
-                    pedido,
-                    10,
-                    0,
-                    0,
-                    RetryConfig.defaultConfig()
-                );
-            } else {
-                Thread.sleep(10);
+        while (aceptandoPedidos || !colaPedidos.isEmpty() || (taskManager != null && taskManager.getActiveTaskCount() > 0)) {
+            try {
+                if (estacionesDisponibles.availablePermits() > 0) {
+                    Pedido pedido = colaPedidos.poll(100, TimeUnit.MILLISECONDS);
+                    if (pedido == null) {
+                        Thread.sleep(10);
+                        continue;
+                    }
+
+                    int clienteId = pedido.getClienteId();
+                    if (clienteId == 3) {
+                        LOGGER.info("Cancelando automáticamente el pedido del Cliente 3 encontrado en la cola.");
+                        System.out.println(GREEN + "Cancelando automáticamente el pedido del Cliente 3..." + RESET);
+                        tareasCompletadasPorPedido.remove(clienteId);
+                        if (pedido.getLatch() != null) {
+                            pedido.getLatch().countDown();
+                        }
+                        System.out.println(GREEN + "Pedido del Cliente 3 cancelado (estaba en la cola)." + RESET);
+                        continue; // Saltar al siguiente pedido
+                    }
+
+                    estacionesDisponibles.acquire();
+                    estacionesOcupadas.put(clienteId, true);
+
+                    List<Step<?>> steps = List.of(
+                            Step.fromFuture(() -> {
+                                try {
+                                    return asyncTasks.prepararBebidaAsync(pedido);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return CompletableFuture.failedFuture(new RuntimeException("Error preparando bebida", e));
+                                }
+                            }, Void.class),
+                            Step.fromFuture(() -> {
+                                try {
+                                    return asyncTasks.prepararAcompañamientoAsync(pedido);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return CompletableFuture.failedFuture(new RuntimeException("Error preparando acompañamiento", e));
+                                }
+                            }, Void.class),
+                            Step.fromFuture(() -> {
+                                try {
+                                    return asyncTasks.entregarPedidoAsync(pedido);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return CompletableFuture.failedFuture(new RuntimeException("Error entregando pedido", e));
+                                }
+                            }, Void.class)
+                    );
+
+                    taskManager.addSequentialTasksWithStrict(
+                            steps,
+                            pedido,
+                            10,
+                            0,
+                            0,
+                            RetryConfig.defaultConfig()
+                    );
+                } else {
+                    Thread.sleep(10);
+                }
+            } catch (InterruptedException e) {
+                interrupted = true;
+                break;
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error procesando pedido", e);
+                System.out.println(GREEN + "Error procesando pedido: " + e.getMessage() + RESET);
+            }
+        }
+
+        try {
+            if (taskManager != null) {
+                taskManager.awaitAll();
             }
         } catch (InterruptedException e) {
             interrupted = true;
-            break;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error procesando pedido", e);
-            System.out.println(GREEN + "Error procesando pedido: " + e.getMessage() + RESET);
+        } finally {
+            Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
+            System.out.println(GREEN + "Métricas finales: "
+                    + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
+                    + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
+                    + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
+                    + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
+                    + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
+            System.out.println(GREEN + "Clientes atendidos: " + clientesAtendidos.get() + ", Ingresos: $" + (ingresosTotales.get() / 100.0) + RESET);
+            if (taskManager != null) {
+                taskManager.close();
+            }
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
-
-    try {
-        if (taskManager != null) {
-            taskManager.awaitAll();
-        }
-    } catch (InterruptedException e) {
-        interrupted = true;
-    } finally {
-        Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
-        System.out.println(GREEN + "Métricas finales: "
-                + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
-                + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
-                + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
-                + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
-                + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
-        System.out.println(GREEN + "Clientes atendidos: " + clientesAtendidos.get() + ", Ingresos: $" + (ingresosTotales.get() / 100.0) + RESET);
-        if (taskManager != null) {
-            taskManager.close();
-        }
-        if (interrupted) {
-            Thread.currentThread().interrupt();
-        }
-    }
-}
 
     public void procesarColaPedidosLowLevelCustom() {
-    taskManager = new TaskManager<>(status -> {
-        Pedido pedido = status.data;
-        if (pedido == null) {
-            LOGGER.warning("Estado recibido con pedido nulo");
-            return;
-        }
-        try {
-            int clienteId = pedido.getClienteId();
-            LOGGER.fine("Callback para clienteId=%d, isLastTaskInPipeline=%b, isCancelled=%b, isFailed=%b"
-                    .formatted(clienteId, status.isLastTaskInPipeline(), status.isCancelled(), status.isFailed()));
-
-            AtomicInteger tareasCompletadas = tareasCompletadasPorPedido.get(clienteId);
-            if (tareasCompletadas == null) {
-                LOGGER.warning("No se encontró contador de tareas para clienteId=%d".formatted(clienteId));
+        taskManager = new TaskManager<>(status -> {
+            Pedido pedido = status.data;
+            if (pedido == null) {
+                LOGGER.warning("Estado recibido con pedido nulo");
                 return;
             }
+            try {
+                int clienteId = pedido.getClienteId();
+                LOGGER.fine("Callback para clienteId=%d, isLastTaskInPipeline=%b, isCancelled=%b, isFailed=%b"
+                        .formatted(clienteId, status.isLastTaskInPipeline(), status.isCancelled(), status.isFailed()));
 
-            if (status.isCancelled()) {
-                LOGGER.info("Pedido del Cliente " + clienteId + " fue cancelado.");
-                System.out.println(GREEN + "Pedido del Cliente " + clienteId + " fue cancelado. Estación liberada." + RESET);
-                liberarEstacion(pedido);
-                tareasCompletadasPorPedido.remove(clienteId);
-            } else if (status.isFailed()) {
-                LOGGER.log(Level.WARNING, "Error en el pedido del Cliente " + clienteId, status.exception);
-                System.out.println(GREEN + "Error en el pedido del Cliente " + clienteId + ": " + status.exception.getMessage() + ". Estación liberada." + RESET);
-                liberarEstacion(pedido);
-                tareasCompletadasPorPedido.remove(clienteId);
-            } else {
-                int tareas = tareasCompletadas.incrementAndGet();
-                LOGGER.fine("Tarea completada para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
-                if (tareas == TASKS_PER_ORDER) {
-                    LOGGER.info("Pedido del Cliente " + clienteId + " completado (todas las tareas finalizadas).");
-                    System.out.println(GREEN + "Pedido del Cliente " + clienteId + " completado. Estación liberada." + RESET);
-                    clientesAtendidos.incrementAndGet();
-                    ingresosTotales.addAndGet((int) (PRECIO_PEDIDO * 100));
+                AtomicInteger tareasCompletadas = tareasCompletadasPorPedido.get(clienteId);
+                if (tareasCompletadas == null) {
+                    LOGGER.warning("No se encontró contador de tareas para clienteId=%d".formatted(clienteId));
+                    return;
+                }
+
+                if (status.isCancelled()) {
+                    LOGGER.info("Pedido del Cliente " + clienteId + " fue cancelado.");
+                    System.out.println(GREEN + "Pedido del Cliente " + clienteId + " fue cancelado. Estación liberada." + RESET);
+                    liberarEstacion(pedido);
+                    tareasCompletadasPorPedido.remove(clienteId);
+                } else if (status.isFailed()) {
+                    LOGGER.log(Level.WARNING, "Error en el pedido del Cliente " + clienteId, status.exception);
+                    System.out.println(GREEN + "Error en el pedido del Cliente " + clienteId + ": " + status.exception.getMessage() + ". Estación liberada." + RESET);
                     liberarEstacion(pedido);
                     tareasCompletadasPorPedido.remove(clienteId);
                 } else {
-                    LOGGER.fine("Ignorando tarea intermedia para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
-                }
-            }
-
-            if (pedido.getLatch() != null && (status.isCancelled() || status.isFailed() || tareasCompletadas.get() == TASKS_PER_ORDER)) {
-                pedido.getLatch().countDown();
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error procesando el callback para el pedido del Cliente " + pedido.getClienteId(), e);
-        }
-    });
-
-    AsyncCafeteriaTasks asyncTasks = new AsyncCafeteriaTasks();
-    boolean interrupted = false;
-
-    while (aceptandoPedidos || !colaPedidos.isEmpty() || (taskManager != null && taskManager.getActiveTaskCount() > 0)) {
-        try {
-            if (estacionesDisponibles.availablePermits() > 0) {
-                Pedido pedido = colaPedidos.poll(100, TimeUnit.MILLISECONDS);
-                if (pedido == null) {
-                    Thread.sleep(10);
-                    continue;
-                }
-
-                int clienteId = pedido.getClienteId();
-                if (clienteId == 3) {
-                    LOGGER.info("Cancelando automáticamente el pedido del Cliente 3 encontrado en la cola.");
-                    System.out.println(GREEN + "Cancelando automáticamente el pedido del Cliente 3..." + RESET);
-                    tareasCompletadasPorPedido.remove(clienteId);
-                    if (pedido.getLatch() != null) {
-                        pedido.getLatch().countDown();
+                    int tareas = tareasCompletadas.incrementAndGet();
+                    LOGGER.fine("Tarea completada para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
+                    if (tareas == TASKS_PER_ORDER) {
+                        LOGGER.info("Pedido del Cliente " + clienteId + " completado (todas las tareas finalizadas).");
+                        System.out.println(GREEN + "Pedido del Cliente " + clienteId + " completado. Estación liberada." + RESET);
+                        clientesAtendidos.incrementAndGet();
+                        ingresosTotales.addAndGet((int) (PRECIO_PEDIDO * 100));
+                        liberarEstacion(pedido);
+                        tareasCompletadasPorPedido.remove(clienteId);
+                    } else {
+                        LOGGER.fine("Ignorando tarea intermedia para clienteId=%d, tareas completadas=%d".formatted(clienteId, tareas));
                     }
-                    System.out.println(GREEN + "Pedido del Cliente 3 cancelado (estaba en la cola)." + RESET);
-                    continue;
                 }
 
-                estacionesDisponibles.acquire();
-                estacionesOcupadas.put(clienteId, true);
+                if (pedido.getLatch() != null && (status.isCancelled() || status.isFailed() || tareasCompletadas.get() == TASKS_PER_ORDER)) {
+                    pedido.getLatch().countDown();
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error procesando el callback para el pedido del Cliente " + pedido.getClienteId(), e);
+            }
+        });
 
-                List<Step<?>> steps = List.of(
-                    Step.fromFuture(() -> {
-                        try {
-                            return asyncTasks.prepararBebidaAsync(pedido);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return CompletableFuture.failedFuture(new RuntimeException("Error preparando bebida", e));
-                        }
-                    }, Void.class),
-                    Step.fromFuture(() -> {
-                        try {
-                            return asyncTasks.prepararAcompañamientoAsync(pedido);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return CompletableFuture.failedFuture(new RuntimeException("Error preparando acompañamiento", e));
-                        }
-                    }, Void.class),
-                    Step.fromFuture(() -> {
-                        try {
-                            return asyncTasks.entregarPedidoAsync(pedido);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return CompletableFuture.failedFuture(new RuntimeException("Error entregando pedido", e));
-                        }
-                    }, Void.class)
-                );
+        AsyncCafeteriaTasks asyncTasks = new AsyncCafeteriaTasks();
+        boolean interrupted = false;
 
-                // Definir el mapa de dependencias para modo CUSTOM
-                Map<Integer, Set<Integer>> dependencies = new HashMap<>();
-                dependencies.put(1, Set.of(0)); // Acompañamiento depende de bebida
-                dependencies.put(2, Set.of(0, 1)); // Entrega depende de bebida y acompañamiento
+        while (aceptandoPedidos || !colaPedidos.isEmpty() || (taskManager != null && taskManager.getActiveTaskCount() > 0)) {
+            try {
+                if (estacionesDisponibles.availablePermits() > 0) {
+                    Pedido pedido = colaPedidos.poll(100, TimeUnit.MILLISECONDS);
+                    if (pedido == null) {
+                        Thread.sleep(10);
+                        continue;
+                    }
 
-                taskManager.addTasks(
-                    steps,
-                    pedido,
-                    10,
-                    0,
-                    0,
-                    RetryConfig.defaultConfig(),
-                 TaskExecutionMode.CUSTOM,
-                    dependencies
-                );
-            } else {
-                Thread.sleep(10);
+                    int clienteId = pedido.getClienteId();
+                    if (clienteId == 3) {
+                        LOGGER.info("Cancelando automáticamente el pedido del Cliente 3 encontrado en la cola.");
+                        System.out.println(GREEN + "Cancelando automáticamente el pedido del Cliente 3..." + RESET);
+                        tareasCompletadasPorPedido.remove(clienteId);
+                        if (pedido.getLatch() != null) {
+                            pedido.getLatch().countDown();
+                        }
+                        System.out.println(GREEN + "Pedido del Cliente 3 cancelado (estaba en la cola)." + RESET);
+                        continue;
+                    }
+
+                    estacionesDisponibles.acquire();
+                    estacionesOcupadas.put(clienteId, true);
+
+                    List<Step<?>> steps = List.of(
+                            Step.fromFuture(() -> {
+                                try {
+                                    return asyncTasks.prepararBebidaAsync(pedido);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return CompletableFuture.failedFuture(new RuntimeException("Error preparando bebida", e));
+                                }
+                            }, Void.class),
+                            Step.fromFuture(() -> {
+                                try {
+                                    return asyncTasks.prepararAcompañamientoAsync(pedido);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return CompletableFuture.failedFuture(new RuntimeException("Error preparando acompañamiento", e));
+                                }
+                            }, Void.class),
+                            Step.fromFuture(() -> {
+                                try {
+                                    return asyncTasks.entregarPedidoAsync(pedido);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return CompletableFuture.failedFuture(new RuntimeException("Error entregando pedido", e));
+                                }
+                            }, Void.class)
+                    );
+
+                    // Definir el mapa de dependencias para modo CUSTOM
+                    Map<Integer, Set<Integer>> dependencies = new HashMap<>();
+                    dependencies.put(1, Set.of(0)); // Acompañamiento depende de bebida
+                    dependencies.put(2, Set.of(0, 1)); // Entrega depende de bebida y acompañamiento
+
+                    taskManager.addTasks(
+                            steps,
+                            pedido,
+                            10,
+                            0,
+                            0,
+                            RetryConfig.defaultConfig(),
+                            TaskExecutionMode.CUSTOM,
+                            dependencies
+                    );
+                } else {
+                    Thread.sleep(10);
+                }
+            } catch (InterruptedException e) {
+                interrupted = true;
+                break;
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error procesando pedido", e);
+                System.out.println(GREEN + "Error procesando pedido: " + e.getMessage() + RESET);
+            }
+        }
+
+        try {
+            if (taskManager != null) {
+                taskManager.awaitAll();
             }
         } catch (InterruptedException e) {
             interrupted = true;
-            break;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error procesando pedido", e);
-            System.out.println(GREEN + "Error procesando pedido: " + e.getMessage() + RESET);
+        } finally {
+            Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
+            System.out.println(GREEN + "Métricas finales: "
+                    + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
+                    + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
+                    + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
+                    + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
+                    + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
+            System.out.println(GREEN + "Clientes atendidos: " + clientesAtendidos.get() + ", Ingresos: $" + (ingresosTotales.get() / 100.0) + RESET);
+            if (taskManager != null) {
+                taskManager.close();
+            }
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
-    try {
-        if (taskManager != null) {
-            taskManager.awaitAll();
-        }
-    } catch (InterruptedException e) {
-        interrupted = true;
-    } finally {
-        Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
-        System.out.println(GREEN + "Métricas finales: "
-                + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
-                + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
-                + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
-                + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
-                + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
-        System.out.println(GREEN + "Clientes atendidos: " + clientesAtendidos.get() + ", Ingresos: $" + (ingresosTotales.get() / 100.0) + RESET);
-        if (taskManager != null) {
-            taskManager.close();
-        }
-        if (interrupted) {
-            Thread.currentThread().interrupt();
-        }
-    }
-}
     public void procesarColaPedidosCustom() {
         taskManager = new TaskManager<>(status -> {
             Pedido pedido = status.data;
@@ -498,7 +499,7 @@ public class Cafeteria {
         } catch (InterruptedException e) {
             interrupted = true;
         } finally {
-            Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
+            Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
             System.out.println(GREEN + "Métricas finales: "
                     + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
                     + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
@@ -514,6 +515,7 @@ public class Cafeteria {
             }
         }
     }
+
     public void procesarColaPedidosSecuencial() {
         taskManager = new TaskManager<>(status -> {
             Pedido pedido = status.data;
@@ -641,7 +643,7 @@ public class Cafeteria {
         } catch (InterruptedException e) {
             interrupted = true;
         } finally {
-            Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
+            Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
             System.out.println(GREEN + "Métricas finales: "
                     + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
                     + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
@@ -657,6 +659,7 @@ public class Cafeteria {
             }
         }
     }
+
     public void procesarColaPedidosStrictSequential() {
         taskManager = new TaskManager<>(status -> {
             Pedido pedido = status.data;
@@ -737,15 +740,15 @@ public class Cafeteria {
 
                     taskManager.pipeline(pedido)
                             .withExecutionMode(TaskExecutionMode.SEQUENTIAL_STRICT)
-                            .step( () -> {
+                            .step(() -> {
                                 try {
                                     return asyncTasks.prepararBebidaAsync(pedido);
                                 } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
                                     return CompletableFuture.failedFuture(new RuntimeException("Error preparando bebida", e));
                                 }
-                            }, Void.class) 
-                            .step( () -> {
+                            }, Void.class)
+                            .step(() -> {
                                 try {
                                     return asyncTasks.prepararAcompañamientoAsync(pedido);
                                 } catch (InterruptedException e) {
@@ -753,7 +756,7 @@ public class Cafeteria {
                                     return CompletableFuture.failedFuture(new RuntimeException("Error preparando acompañamiento", e));
                                 }
                             }, Void.class)
-                            .step( () -> {
+                            .step(() -> {
                                 try {
                                     return asyncTasks.entregarPedidoAsync(pedido);
                                 } catch (InterruptedException e) {
@@ -784,7 +787,7 @@ public class Cafeteria {
         } catch (InterruptedException e) {
             interrupted = true;
         } finally {
-            Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
+            Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
             System.out.println(GREEN + "Métricas finales: "
                     + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
                     + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
@@ -800,7 +803,8 @@ public class Cafeteria {
             }
         }
     }
-      public void procesarColaPedidosParallel() {
+
+    public void procesarColaPedidosParallel() {
         taskManager = new TaskManager<>(status -> {
             Pedido pedido = status.data;
             if (pedido == null) {
@@ -907,13 +911,13 @@ public class Cafeteria {
                             .withPriority(10)
                             .withAutoCancel(0)
                             .withMaxRetries(0)
-                             .withRetryConfig(RetryConfig.builder()
-                    .withMaxAttempts(4)
-                    .withDelay(100)
-                    .withBackoff(2.0) 
-                    .withJitter(50)
-                    .withRetryIf(e -> e instanceof RuntimeException) 
-                    .build())
+                            .withRetryConfig(RetryConfig.builder()
+                                    .withMaxAttempts(4)
+                                    .withDelay(100)
+                                    .withBackoff(2.0)
+                                    .withJitter(50)
+                                    .withRetryIf(e -> e instanceof RuntimeException)
+                                    .build())
                             .execute();
                 } else {
                     Thread.sleep(10);
@@ -934,7 +938,7 @@ public class Cafeteria {
         } catch (InterruptedException e) {
             interrupted = true;
         } finally {
-            Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
+            Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
             System.out.println(GREEN + "Métricas finales: "
                     + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
                     + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
@@ -950,7 +954,8 @@ public class Cafeteria {
             }
         }
     }
-         public void procesarColaPedidosConReintentos() {
+
+    public void procesarColaPedidosConReintentos() {
         taskManager = new TaskManager<>(status -> {
             Pedido pedido = status.data;
             if (pedido == null) {
@@ -1029,7 +1034,7 @@ public class Cafeteria {
                     estacionesOcupadas.put(clienteId, true);
 
                     taskManager.pipeline(pedido)
-                            .withExecutionMode(TaskExecutionMode.PARALLEL)
+                            .withExecutionMode(TaskExecutionMode.SEQUENTIAL)
                             .step(() -> {
                                 try {
                                     return asyncTasks.prepararBebidaAsync(pedido);
@@ -1056,14 +1061,13 @@ public class Cafeteria {
                             })
                             .withPriority(10)
                             .withAutoCancel(0)
-                           
-                             .withRetryConfig(RetryConfig.builder()
-                    .withMaxAttempts(4)
-                    .withDelay(100)
-                    .withBackoff(2.0) 
-                    .withJitter(50)
-                    .withRetryIf(e -> e instanceof RuntimeException) 
-                    .build())
+                            .withRetryConfig(RetryConfig.builder()
+                                    .withMaxAttempts(4)
+                                    .withDelay(100)
+                                    .withBackoff(2.0)
+                                    .withJitter(50)
+                                    .withRetryIf(e -> e instanceof RuntimeException)
+                                    .build())
                             .execute();
                 } else {
                     Thread.sleep(10);
@@ -1084,22 +1088,19 @@ public class Cafeteria {
         } catch (InterruptedException e) {
             interrupted = true;
         } finally {
-            Map<String, Long> metrics = taskManager != null ? taskManager.getMetrics() : new HashMap<>();
-            System.out.println(GREEN + "Métricas finales: "
-                    + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
-                    + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
-                    + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
-                    + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
-                    + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
+
             System.out.println(GREEN + "Clientes atendidos: " + clientesAtendidos.get() + ", Ingresos: $" + (ingresosTotales.get() / 100.0) + RESET);
+
             if (taskManager != null) {
                 taskManager.close();
+
             }
             if (interrupted) {
                 Thread.currentThread().interrupt();
             }
         }
     }
+
     private void liberarEstacion(Pedido pedido) {
         Boolean ocupado = estacionesOcupadas.remove(pedido.getClienteId());
         if (ocupado != null && ocupado) {
@@ -1116,12 +1117,20 @@ public class Cafeteria {
         }
     }
 
-    public Map<String, Long> getTaskManagerMetrics() {
-        return taskManager != null ? taskManager.getMetrics() : new HashMap<>();
-    }
-
     public void cerrar() {
         System.out.println(GREEN + "Cerrando la cafetería, no se aceptan nuevos pedidos" + RESET);
+        String metrics1 = taskManager.getMetrics();
+       
+        System.out.println("LAS MÉTRICAS SON: " + GREEN + metrics1 + RESET);
+        Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
+        System.out.println(GREEN + "Métricas finales: "
+                + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
+                + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
+                + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
+                + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
+                + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
+        System.out.println("LAS METRICAS SON: " + GREEN + taskManager.getMetrics());
+      
         aceptandoPedidos = false;
 
         Pedido pedido;
@@ -1148,16 +1157,9 @@ public class Cafeteria {
         System.out.println(GREEN + "Cafetería cerrada." + RESET);
         mostrarEstado();
     }
-// Método síncrono usando @Await
-//@Await
-//public CompletableFuture<Void> procesarBebidaSincrona() throws InterruptedException {
-//    Random random = new Random();
-//    CountDownLatch latch = new CountDownLatch(1);
-//    Pedido pedido = new Pedido(5, random.nextInt(TIEMPO_MAXIMO_BEBIDA - TIEMPO_MINIMO_BEBIDA + 1) + TIEMPO_MINIMO_BEBIDA, 0, latch);
-//    AsyncCafeteriaTasks asyncTasks = new AsyncCafeteriaTasks();
-//    return asyncTasks.prepararBebidaAsync(pedido);
-//}
-//// Procesar pedido con reintentos avanzados
+
+
+ 
 
     public void mostrarEstado() {
         System.out.println(GREEN + "\n=== Estado de la cafetería ===" + RESET);

@@ -467,3 +467,27 @@ La sintaxis es la siguiente
 ```java
 Task<Void> processingTask = Task.execute(cafeteria::procesarColaPedidosConReintentos);
 ```
+
+## Metricas finales
+
+Estas metricas indican si una tarea o varias se han completado, cancelado, fallado, activas o se ha acabado el tiempo de ejecucion hay 2 formas de obtenerlas
+
+Forma programatica:
+
+```java
+  Map<String, Long> metrics = taskManager != null ? taskManager.getMetricsMap() : new HashMap<>();
+        System.out.println(GREEN + "Métricas finales: "
+                + "Completadas=" + metrics.getOrDefault("completedTasks", 0L)
+                + ", Canceladas=" + metrics.getOrDefault("cancelledTasks", 0L)
+                + ", Fallidas=" + metrics.getOrDefault("failedTasks", 0L)
+                + ", TimedOut=" + metrics.getOrDefault("timedOutTasks", 0L)
+                + ", Activas=" + metrics.getOrDefault("activeTasks", 0L) + RESET);
+```
+
+Forma no programatica:
+
+```java
+ String metrics1 = taskManager.getMetrics();
+
+     System.out.println("LAS MÉTRICAS SON: " + GREEN + metrics1 + RESET);
+```

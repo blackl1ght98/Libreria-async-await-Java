@@ -57,7 +57,7 @@ class TaskManagerTest {
         manager.awaitAll();
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
         assertTrue(completedData.contains("TestData"), "Esperaba 'TestData' en completedData");
-        assertEquals(1, manager.getMetrics().get("completedTasks"), "Esperaba 1 tarea completada");
+        assertEquals(1, manager.getMetricsMap().get("completedTasks"), "Esperaba 1 tarea completada");
     }
 
 //    @Test
@@ -146,7 +146,7 @@ class TaskManagerTest {
         }
         manager.awaitAll();
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
-        assertEquals(10, manager.getMetrics().get("completedTasks"), "Esperaba 10 tareas completadas");
+        assertEquals(10, manager.getMetricsMap().get("completedTasks"), "Esperaba 10 tareas completadas");
         int highPriorityCount = (int) executionOrder.stream().filter(p -> p.equals("Prioridad2")).count();
         assertEquals(3, highPriorityCount, "Esperaba 3 tareas de prioridad 2, pero obtuve " + highPriorityCount);
     }
@@ -179,8 +179,8 @@ class TaskManagerTest {
         assertTrue(callbackLatch.await(5, TimeUnit.SECONDS), "Callback de cancelación no recibido");
         manager.awaitAll();
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
-        assertEquals(1, manager.getMetrics().get("cancelledTasks"),
-                "Esperaba 1 cancelación, pero obtuve " + manager.getMetrics().get("cancelledTasks"));
+        assertEquals(1, manager.getMetricsMap().get("cancelledTasks"),
+                "Esperaba 1 cancelación, pero obtuve " + manager.getMetricsMap().get("cancelledTasks"));
         assertTrue(completedData.contains("CancelManualCallback"),
                 "Callback no incluyó CancelManualCallback, contiene: " + completedData);
     }
@@ -257,7 +257,7 @@ class TaskManagerTest {
         manager.awaitAll();
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
         assertTrue(completedData.contains("LongData"), "Esperaba 'LongData' en completedData");
-        assertEquals(1, manager.getMetrics().get("completedTasks"), "Esperaba 1 tarea completada");
+        assertEquals(1, manager.getMetricsMap().get("completedTasks"), "Esperaba 1 tarea completada");
     }
 
     @Test
@@ -279,7 +279,7 @@ class TaskManagerTest {
         assertTrue(callbackLatch.await(5, TimeUnit.SECONDS), "Callback de fallo no recibido");
         manager.awaitAll();
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
-        assertEquals(1, manager.getMetrics().get("failedTasks"), "Esperaba 1 tarea fallida");
+        assertEquals(1, manager.getMetricsMap().get("failedTasks"), "Esperaba 1 tarea fallida");
         assertEquals(3, attempts.get(), "Esperaba 3 intentos (1 inicial + 2 reintentos)");
     }
 
@@ -306,7 +306,7 @@ class TaskManagerTest {
         manager.close();
         assertTrue(callbackLatch.await(5, TimeUnit.SECONDS), "Callback de cancelación no recibido");
         assertEquals(0, manager.getActiveTaskCount(), "Esperaba 0 tareas activas");
-        assertEquals(1, manager.getMetrics().get("cancelledTasks"), "Esperaba 1 tarea cancelada");
+        assertEquals(1, manager.getMetricsMap().get("cancelledTasks"), "Esperaba 1 tarea cancelada");
     }
 
     @Test

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="1.022" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="1.013" tests="3" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="24"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="user.country" value="ES"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-24\bin"/>
-    <property name="sun.java.command" value="C:\Users\guill\AppData\Local\Temp\surefire13226924134065295188\surefirebooter-20250609223452204_3.jar C:\Users\guill\AppData\Local\Temp\surefire13226924134065295188 2025-06-09T22-34-51_909-jvmRun1 surefire-20250609223452204_1tmp surefire_0-20250609223452204_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\guill\AppData\Local\Temp\surefire6375770597513244973\surefirebooter-20250616161548280_3.jar C:\Users\guill\AppData\Local\Temp\surefire6375770597513244973 2025-06-16T16-15-48_072-jvmRun1 surefire-20250616161548280_1tmp surefire_0-20250616161548280_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\target\test-classes;C:\Users\guill\OneDrive\Documentos\NetBeansProjects\asyncawaitjava\target\classes;C:\Users\guill\.m2\repository\org\javassist\javassist\3.30.2-GA\javassist-3.30.2-GA.jar;C:\Users\guill\.m2\repository\com\squareup\javapoet\1.13.0\javapoet-1.13.0.jar;C:\Users\guill\.m2\repository\javax\annotation\javax.annotation-api\1.3.2\javax.annotation-api-1.3.2.jar;C:\Users\guill\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\guill\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\guill\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\guill\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\guill\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\guill\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -32,7 +32,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\guill\AppData\Local\Temp\surefire13226924134065295188\surefirebooter-20250609223452204_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\guill\AppData\Local\Temp\surefire6375770597513244973\surefirebooter-20250616161548280_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="24+36-3646"/>
@@ -62,94 +62,94 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="68.0"/>
   </properties>
-  <testcase name="testNonRetryableException" classname="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="0.174">
-    <system-err><![CDATA[jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testNonRetryableException$1
+  <testcase name="testNonRetryableException" classname="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="0.167">
+    <system-err><![CDATA[jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=1, métricas=Métricas de TaskManager: Completadas=0, Canceladas=0, Fallidas=0, Expiradas=0, Activas=1
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testNonRetryableException$1
 INFO: Intento #1
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=1, métricas={timedOutTasks=0, activeTasks=1, cancelledTasks=0, completedTasks=0, failedTasks=0}
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
 WARNING: Excepción no reintentable tras 1 intentos: Fallo no reintentable
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
-WARNING: Task execution failed: Error ejecutando la tarea tras 1 intentos
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
 WARNING: Error esperando tareas: com.example.company.asyncawaitjava.exceptions.customizedException$TaskException: Error ejecutando la tarea tras 1 intentos. Tareas afectadas: [TestData]
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+WARNING: Task execution failed: Error ejecutando la tarea tras 1 intentos
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
 INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@6a192cfe, datos=TestData, isCancelled=false, isFailed=true
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$setUp$0
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$setUp$0
 INFO: Estado: data=TestData, isFailed=true, excepción=com.example.company.asyncawaitjava.exceptions.customizedException$TaskManagerException: Error ejecutando la tarea tras 1 intentos
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
 INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@6a192cfe, datos=TestData
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=0, failedTasks=1}
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas=Métricas de TaskManager: Completadas=0, Canceladas=0, Fallidas=1, Expiradas=0, Activas=0
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
 INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@76508ed1[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
 INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@28eaa59a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@479d31f3[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4cc451f2[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 0, fallidas: 1, timedOut: 0
 ]]></system-err>
   </testcase>
   <testcase name="testRetrySuccessAfterFailure" classname="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="0.421">
-    <system-err><![CDATA[jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=1, métricas={timedOutTasks=0, activeTasks=1, cancelledTasks=0, completedTasks=0, failedTasks=0}
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetrySuccessAfterFailure$1
+    <system-err><![CDATA[jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=1, métricas=Métricas de TaskManager: Completadas=0, Canceladas=0, Fallidas=0, Expiradas=0, Activas=1
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetrySuccessAfterFailure$1
 INFO: Intento #1
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetrySuccessAfterFailure$1
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetrySuccessAfterFailure$1
 INFO: Intento #2
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetrySuccessAfterFailure$1
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetrySuccessAfterFailure$1
 INFO: Intento #3
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@5fdcaa40, datos=TestData, isCancelled=false, isFailed=false
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@5fdcaa40, datos=TestData
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5fdcaa40, datos=TestData
-jun 09, 2025 10:34:53 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$setUp$0
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@16293aa2, datos=TestData, isCancelled=false, isFailed=false
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Tarea completada exitosamente: task=com.example.company.asyncawaitjava.task.Task@16293aa2, datos=TestData
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$setUp$0
 INFO: Estado: data=TestData, isFailed=false, excepción=null
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=1, failedTasks=0}
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@7334aada[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@6c80d78a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@6aba2b86[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@16293aa2, datos=TestData
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas=Métricas de TaskManager: Completadas=1, Canceladas=0, Fallidas=0, Expiradas=0, Activas=0
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@2a798d51[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@245b4bdc[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@38c6f217[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 1, canceladas: 0, fallidas: 0, timedOut: 0
 ]]></system-err>
   </testcase>
-  <testcase name="testRetryExceedsMaxAttempts" classname="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="0.419">
-    <system-err><![CDATA[jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Iniciando awaitAll, tareas activas=1, métricas={timedOutTasks=0, activeTasks=1, cancelledTasks=0, completedTasks=0, failedTasks=0}
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetryExceedsMaxAttempts$1
+  <testcase name="testRetryExceedsMaxAttempts" classname="com.example.company.asyncawaitjava.task.TaskManagerRetryTest" time="0.417">
+    <system-err><![CDATA[jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Iniciando awaitAll, tareas activas=1, métricas=Métricas de TaskManager: Completadas=0, Canceladas=0, Fallidas=0, Expiradas=0, Activas=1
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetryExceedsMaxAttempts$1
 INFO: Intento #1
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetryExceedsMaxAttempts$1
+jun 16, 2025 4:15:49 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetryExceedsMaxAttempts$1
 INFO: Intento #2
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetryExceedsMaxAttempts$1
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$testRetryExceedsMaxAttempts$1
 INFO: Intento #3
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager$1RetryAttempt attempt
 WARNING: Error tras 3 intentos, reintentos=2: Fallo simulado
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
 WARNING: Error esperando tareas: com.example.company.asyncawaitjava.exceptions.customizedException$TaskException: Error ejecutando la tarea tras 3 intentos. Tareas afectadas: [TestData]
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.Task lambda$execute$0
 WARNING: Task execution failed: Error ejecutando la tarea tras 3 intentos
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
-INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@5ffead27, datos=TestData, isCancelled=false, isFailed=true
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
-INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@5ffead27, datos=TestData
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$setUp$0
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager processTaskCompletion
+INFO: Procesando tarea: task=com.example.company.asyncawaitjava.task.Task@223d2c72, datos=TestData, isCancelled=false, isFailed=true
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager cleanupTask
+INFO: Limpiando tarea=com.example.company.asyncawaitjava.task.Task@223d2c72, datos=TestData
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManagerRetryTest lambda$setUp$0
 INFO: Estado: data=TestData, isFailed=true, excepción=com.example.company.asyncawaitjava.exceptions.customizedException$TaskManagerException: Error ejecutando la tarea tras 3 intentos
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
-INFO: Finalizado awaitAll, tareas activas=0, métricas={timedOutTasks=0, activeTasks=0, cancelledTasks=0, completedTasks=0, failedTasks=1}
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@74e52303[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@323b36e0[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
-INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@4f6ee6e4[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
-jun 09, 2025 10:34:54 P. M. com.example.company.asyncawaitjava.task.TaskManager close
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager awaitAll
+INFO: Finalizado awaitAll, tareas activas=0, métricas=Métricas de TaskManager: Completadas=0, Canceladas=0, Fallidas=1, Expiradas=0, Activas=0
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ScheduledThreadPoolExecutor@79e2c065[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@564fabc8[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager shutdownExecutors
+INFO: Ejecutor java.util.concurrent.ThreadPoolExecutor@10e31a9a[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0] cerrado exitosamente tras 1 intento(s)
+jun 16, 2025 4:15:50 P. M. com.example.company.asyncawaitjava.task.TaskManager close
 INFO: TaskManager cerrado, tareas activas: 0, completadas: 0, canceladas: 0, fallidas: 1, timedOut: 0
 ]]></system-err>
   </testcase>

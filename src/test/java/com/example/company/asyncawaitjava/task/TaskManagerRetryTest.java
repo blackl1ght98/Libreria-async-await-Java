@@ -60,8 +60,8 @@ public class TaskManagerRetryTest {
         taskManager.awaitAll();
         assertEquals(3, attempts.get(), "Se esperaban 3 intentos");
         assertEquals("Éxito", task.getFuture().join(), "La tarea debería completarse con éxito");
-        assertEquals(1, taskManager.getMetrics().getOrDefault("completedTasks", 0L), "Se esperaba 1 tarea completada");
-        assertEquals(0, taskManager.getMetrics().getOrDefault("failedTasks", 0L), "No se esperaban tareas fallidas");
+        assertEquals(1, taskManager.getMetricsMap().getOrDefault("completedTasks", 0L), "Se esperaba 1 tarea completada");
+        assertEquals(0, taskManager.getMetricsMap().getOrDefault("failedTasks", 0L), "No se esperaban tareas fallidas");
     }
 
     @Test
@@ -85,8 +85,8 @@ public class TaskManagerRetryTest {
         //Thread.sleep(100); // Temporal hasta corregir awaitAll
         assertEquals(3, attempts.get(), "Se esperaban 3 intentos");
         assertTrue(task.getFuture().isCompletedExceptionally(), "La tarea debería fallar");
-        assertEquals(0, taskManager.getMetrics().getOrDefault("completedTasks", 0L), "No se esperaban tareas completadas");
-        assertEquals(1, taskManager.getMetrics().getOrDefault("failedTasks", 0L), "Se esperaba 1 tarea fallida");
+        assertEquals(0, taskManager.getMetricsMap().getOrDefault("completedTasks", 0L), "No se esperaban tareas completadas");
+        assertEquals(1, taskManager.getMetricsMap().getOrDefault("failedTasks", 0L), "Se esperaba 1 tarea fallida");
     }
 
     @Test
@@ -106,7 +106,7 @@ public class TaskManagerRetryTest {
         taskManager.awaitAll();
         assertEquals(1, attempts.get(), "Se esperaba 1 intento");
         assertTrue(task.getFuture().isCompletedExceptionally(), "La tarea debería fallar");
-        assertEquals(0, taskManager.getMetrics().getOrDefault("completedTasks", 0L), "No se esperaban tareas completadas");
-        assertEquals(1, taskManager.getMetrics().getOrDefault("failedTasks", 0L), "Se esperaba 1 tarea fallida");
+        assertEquals(0, taskManager.getMetricsMap().getOrDefault("completedTasks", 0L), "No se esperaban tareas completadas");
+        assertEquals(1, taskManager.getMetricsMap().getOrDefault("failedTasks", 0L), "Se esperaba 1 tarea fallida");
     }
 }

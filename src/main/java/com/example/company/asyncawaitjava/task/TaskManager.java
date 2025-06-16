@@ -1489,7 +1489,7 @@ public void awaitAll() throws InterruptedException {
         addChainedTasks(firstAction, secondAction, data, priority, autoCancelAfterMs, RetryConfig.defaultConfig());
     }
 
-    public Map<String, Long> getMetrics() {
+    public Map<String, Long> getMetricsMap() {
         return Map.of(
                 "completedTasks", completedTasksCount.get(),
                 "cancelledTasks", cancelledTasksCount.get(),
@@ -1498,6 +1498,21 @@ public void awaitAll() throws InterruptedException {
                 "activeTasks", (long) getActiveTaskCount()
         );
     }
+    /**
+ * Devuelve un string formateado con las métricas de ejecución de tareas en español.
+ *
+ * @return Un string con las métricas formateadas (completadas, canceladas, fallidas, expiradas y activas).
+ */
+public String getMetrics() {
+    return String.format(
+        "Métricas de TaskManager: Completadas=%d, Canceladas=%d, Fallidas=%d, Expiradas=%d, Activas=%d",
+        completedTasksCount.get(),
+        cancelledTasksCount.get(),
+        failedTasksCount.get(),
+        timedOutTasksCount.get(),
+        (long) getActiveTaskCount()
+    );
+}
   /**
      * Adds two chained tasks with custom retry configuration.
      *
